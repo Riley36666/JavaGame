@@ -10,7 +10,9 @@ public class StartScreen {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(700, 700);
         frame.setLocationRelativeTo(null);
-
+        frame.setIconImage(
+                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
+        );
         // --- Background panel with gradient ---
         JPanel panel = new JPanel() {
             @Override

@@ -69,7 +69,9 @@ public class OptionMenu {
         fullscreenBox.setOpaque(false);
         fullscreenBox.setSelected(GameSettings.isFullscreen());
         panel.add(fullscreenBox, gbc);
-
+        frame.setIconImage(
+                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
+        );
         // --- FPS Limit ---
         // --- Player color option ---
         gbc.gridwidth = 1;

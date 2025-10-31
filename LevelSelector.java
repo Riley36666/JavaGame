@@ -18,7 +18,9 @@ public class LevelSelector {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(900, 700);
         frame.setLocationRelativeTo(null);
-
+        frame.setIconImage(
+                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
+        );
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {

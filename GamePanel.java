@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
@@ -32,6 +33,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean lost = false;
     private int currentlevel;
 
+    // ---------- Background ----------
+    private Image backgroundImage;
+    private int bgWidth = 1920;
+    private int bgHeight = 1080;
+
     // ---------- Constructors ----------
     public GamePanel(int[][] platforms, int[][] wincon) {
         this.platforms = platforms;
@@ -51,6 +57,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         setBackground(Color.BLACK);
         setFocusable(true);
         addKeyListener(this);
+
+        // Load background image
+        backgroundImage = Toolkit.getDefaultToolkit().getImage(
+                GamePanel.class.getResource("/background.png")
+        );
+        if (backgroundImage == null) {
+            // Fallback for testing in IntelliJ
+            backgroundImage = Toolkit.getDefaultToolkit().getImage("images/background.png");
+        }
 
         // Load colors
         String colorName = GameSettings.getPlayerColor();
@@ -94,6 +109,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         frame.add(panel);
         panel.setFrame(frame);
         frame.setVisible(true);
+        frame.setIconImage(
+                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
+        );
     }
 
     public void setFrame(JFrame frame) {
@@ -104,6 +122,20 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        // Repeat the background seamlessly as the camera scrolls
+        if (backgroundImage != null) {
+            int bgX = (int)(-cameraX * 0.5) % bgWidth; // parallax + looping
+            if (bgX > 0) bgX -= bgWidth; // ensure smooth wrap
+
+            for (int x = bgX; x < getWidth(); x += bgWidth) {
+                // draw image, aligning ground to floor (y=680)
+                g.drawImage(backgroundImage, x, 680 - (bgHeight - 400), bgWidth, bgHeight, this);
+            }
+        } else {
+            g.setColor(Color.CYAN);
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
 
         // Platforms
         g.setColor(floorColor);
@@ -161,7 +193,6 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         for (int[] p : platforms) {
             Rectangle platRect = new Rectangle(p[0], p[1], p[2], p[3]);
             if (playerRect.intersects(platRect)) {
-                // landed on top
                 if (playerY + playerHeight - velocityY <= p[1]) {
                     playerY = p[1] - playerHeight;
                     velocityY = 0;
@@ -213,7 +244,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         pressedKeys.add(e.getKeyCode());
         if (e.getKeyCode() == KeyEvent.VK_Q) {
             if (frame != null) frame.dispose();
-            System.exit(0);
+            LevelSelector.open(frame);
         }
     }
 
