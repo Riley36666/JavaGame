@@ -1,7 +1,8 @@
 # 🎮 JavaGame
 
 Welcome to **JavaGame**, a small 2D game built entirely in **Java Swing**.  
-This was my **first ever programming project**, created to learn the fundamentals of game development, graphics, and user input handling in Java.
+This was my **first ever programming project**, created to learn the fundamentals of game development, graphics, and user input handling in Java.  
+It was made with occasional help from **AI assistance** when I needed guidance. 🤖
 
 ---
 
@@ -14,7 +15,7 @@ JavaGame is a simple desktop game that includes:
 - Multiple playable **Levels**
 - Custom **graphics and settings**
 
-It’s a lightweight, pure Java project — no external libraries or engines.
+It’s a lightweight, pure Java project — no external libraries or game engines.
 
 ---
 
@@ -41,18 +42,19 @@ This project helped me understand:
 
 ## 🚀 How to Run
 
-### Prerequisites
-- [Java JDK 17+](https://adoptium.net/) (or any version supporting Swing)
-- A Java IDE like **IntelliJ IDEA**, **Eclipse**, or **VS Code** with Java support
 
-### Running from the Command Line
+### 🧩 Running from the Command Line
+
 ```bash
-# Clone the repository
+# 1️⃣ Clone the repository
 git clone https://github.com/Riley36666/JavaGame.git
 cd JavaGame
 
-# Compile all .java files
-javac *.java
+# 2️⃣ Compile all Java source files into a 'classes' folder
+javac -d classes *.java
 
-# Run the game
-java Main
+# 3️⃣ Package everything into a runnable JAR
+jar cfm finishedjar/Game.jar MANIFEST.MF -C classes . -C images .
+
+# 4️⃣ Run the game!
+java -jar finishedjar/Game.jar
