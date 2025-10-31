@@ -82,7 +82,7 @@ public class LevelSelector {
             });
             navPanel.add(prevPage);
         }
-        JLabel WIP = new  JLabel("WIP");
+        //JLabel WIP = new  JLabel("WIP");
 
         if (page < 2) { // we only have 2 pages
             JButton nextPage = new JButton(">");
@@ -92,7 +92,7 @@ public class LevelSelector {
                 showPage(page + 1);
             });
             navPanel.add(nextPage);
-            navPanel.add(WIP);
+            //.add(WIP);
         }
 
         bottomPanel.add(navPanel, BorderLayout.EAST);

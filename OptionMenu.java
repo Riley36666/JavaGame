@@ -70,6 +70,22 @@ public class OptionMenu {
         fullscreenBox.setSelected(GameSettings.isFullscreen());
         panel.add(fullscreenBox, gbc);
 
+        // --- FPS Limit ---
+        // --- Player color option ---
+        gbc.gridwidth = 1;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        JLabel FPS = new JLabel("FPS:");
+        FPS.setForeground(Color.WHITE);
+        FPS.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        panel.add(FPS, gbc);
+
+        gbc.gridx = 1;
+        String[] limits = {"30", "60", "120", "240"};
+        JComboBox<String> FPSlists = new JComboBox<>(limits);
+        FPSlists.setSelectedItem(GameSettings.getFPS());
+        panel.add(FPSlists, gbc);
+
         // --- Buttons ---
         gbc.gridwidth = 1;
         gbc.gridy++;
@@ -88,6 +104,7 @@ public class OptionMenu {
             GameSettings.setPlayerColor((String) playerColorBox.getSelectedItem());
             GameSettings.setFloorColor((String) floorColorBox.getSelectedItem());
             GameSettings.setFullscreen(fullscreenBox.isSelected());
+            GameSettings.setFPS(FPSlists.getSelectedItem().toString());
             GameSettings.save();
 
             JOptionPane.showMessageDialog(frame, "Settings saved successfully!");

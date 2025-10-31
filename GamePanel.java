@@ -14,6 +14,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private final Set<Integer> pressedKeys = new HashSet<>();
     private Color playerColor = Color.RED; // default
     private Color floorColor = Color.GREEN;
+    private int time = 16;
     // ---------- Physics ----------
     private double velocityY = 0;
     private final double gravity = 0.6;
@@ -68,8 +69,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             case "PINK": floorColor = Color.PINK; break;
             default: floorColor = Color.GREEN; break;
         }
-        // 60 FPS timer
-        timer = new Timer(16, this);
+        //FPS Amounnts
+        int FPS = GameSettings.getFPS();
+        switch (FPS){
+            case 30: time = 33; break;
+            case 60: time = 16; break;
+            case 120: time = 8; break;
+            case 240: time = 4; break;
+        }
+        timer = new Timer(time, this);
         timer.start();
     }
 
@@ -181,6 +189,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
                 // Wait 5 seconds before restarting
                 javax.swing.Timer restartTimer = new javax.swing.Timer(500, e2 -> {
+                    frame.dispose();
                     LevelSelector.open(frame);
                 });
                 restartTimer.setRepeats(false);

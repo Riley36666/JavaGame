@@ -32,6 +32,7 @@ public class GameSettings {
         props.setProperty("player.color", "RED");
         props.setProperty("floor.color", "GREEN");
         props.setProperty("fullscreen", "false");
+        props.setProperty("FPS", "60");
     }
 
     // --- Player color ---
@@ -51,7 +52,9 @@ public class GameSettings {
     public static void setFloorColor(String color) {
         props.setProperty("floor.color", color);
     }
-
+    public static void setFPS(String fps) {
+        props.setProperty("FPS", fps);
+    }
     // --- Fullscreen ---
     public static boolean isFullscreen() {
         return Boolean.parseBoolean(props.getProperty("fullscreen", "false"));
@@ -59,5 +62,9 @@ public class GameSettings {
 
     public static void setFullscreen(boolean fullscreen) {
         props.setProperty("fullscreen", String.valueOf(fullscreen));
+    }
+    // --- FPS ---
+    public static int getFPS() {
+        return Integer.parseInt(props.getProperty("FPS", "60"));
     }
 }
