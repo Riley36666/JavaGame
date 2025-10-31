@@ -8,7 +8,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     // ---------- Player settings ----------
     private int playerX = 100;
-    private int playerY = 100;
+    private int playerY = 630;
     private final int playerWidth = 50;
     private final int playerHeight = 50;
     private final Set<Integer> pressedKeys = new HashSet<>();
@@ -27,7 +27,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
     private JFrame frame;
     private boolean gameOver = false;
-
+    private boolean lost = false;
+    private int currentlevel;
     // ---------- Constructors ----------
     public GamePanel(int[][] platforms, int[][] wincon) {
         this.platforms = platforms;
@@ -38,6 +39,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     public GamePanel(int level) {
         this.platforms = LevelData.getLevel(level);
         this.wincon = LevelData.wincon(level);
+        this.currentlevel = level;
         init();
     }
 
@@ -114,6 +116,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("YOU WIN!", getWidth() / 2 - 150, getHeight() / 2);
         }
+        if(lost){
+            g.setColor(Color.RED);
+            g.setFont(new Font("Arial", Font.BOLD, 48));
+            g.drawString("LOST!", getWidth() / 2 - 150, getHeight() / 2);
+        }
     }
 
     // ---------- Game Loop ----------
@@ -153,7 +160,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 }
             }
         }
-
+        if(playerY > 680) {
+            lost = true;
+            timer.stop();
+            repaint();
+            javax.swing.Timer restartTimer = new javax.swing.Timer(500, e2 -> {
+                start(currentlevel);
+            });
+            restartTimer.setRepeats(false);
+            restartTimer.start();
+            return;
+        }
         // Win condition
         for (int[] p : wincon) {
             Rectangle winRect = new Rectangle(p[0], p[1], p[2], p[3]);

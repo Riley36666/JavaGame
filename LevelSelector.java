@@ -5,17 +5,19 @@ import java.awt.event.MouseEvent;
 
 public class LevelSelector {
 
-    public static void open(JFrame startFrame) {
-        // Hide the start screen
-        startFrame.setVisible(false);
+    private static int currentPage = 1;
 
-        // --- Frame setup ---
+    public static void open(JFrame startFrame) {
+        startFrame.setVisible(false);
+        showPage(1); // start with page 1
+    }
+
+    private static void showPage(int page) {
         JFrame frame = new JFrame("Level Selector");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(900, 700);
         frame.setLocationRelativeTo(null);
 
-        // --- Background panel with gradient ---
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -30,17 +32,19 @@ public class LevelSelector {
         backgroundPanel.setLayout(new BorderLayout(0, 40));
         backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 80, 40, 80));
 
-        // --- Title label ---
         JLabel title = new JLabel("Select a Level", SwingConstants.CENTER);
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
         backgroundPanel.add(title, BorderLayout.NORTH);
 
-        // --- Center panel with grid of buttons ---
         JPanel gridPanel = new JPanel(new GridLayout(2, 5, 20, 20));
         gridPanel.setOpaque(false);
 
-        for (int i = 1; i <= 10; i++) {
+        // --- determine which levels to show on this page ---
+        int startLevel = (page - 1) * 10 + 1;
+        int endLevel = startLevel + 9;
+
+        for (int i = startLevel; i <= endLevel; i++) {
             JButton button = createLevelButton("Level " + i);
             int level = i;
             button.addActionListener(e -> {
@@ -52,21 +56,48 @@ public class LevelSelector {
 
         backgroundPanel.add(gridPanel, BorderLayout.CENTER);
 
-        // --- Bottom-right: Back button ---
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // --- Bottom navigation panel ---
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
 
+        // Left: Back to Start button
         JButton backButton = new JButton("Back");
         styleSecondaryButton(backButton);
         backButton.addActionListener(e -> {
             frame.dispose();
             StartScreen.startscreen();
         });
+        bottomPanel.add(backButton, BorderLayout.WEST);
 
-        bottomPanel.add(backButton);
+        // Right: Page navigation buttons
+        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        navPanel.setOpaque(false);
+
+        if (page > 1) {
+            JButton prevPage = new JButton("<");
+            styleSecondaryButton(prevPage);
+            prevPage.addActionListener(e -> {
+                frame.dispose();
+                showPage(page - 1);
+            });
+            navPanel.add(prevPage);
+        }
+        JLabel WIP = new  JLabel("WIP");
+
+        if (page < 2) { // we only have 2 pages
+            JButton nextPage = new JButton(">");
+            styleSecondaryButton(nextPage);
+            nextPage.addActionListener(e -> {
+                frame.dispose();
+                showPage(page + 1);
+            });
+            navPanel.add(nextPage);
+            navPanel.add(WIP);
+        }
+
+        bottomPanel.add(navPanel, BorderLayout.EAST);
         backgroundPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        // --- Show frame ---
         frame.add(backgroundPanel);
         frame.setVisible(true);
     }
@@ -80,7 +111,6 @@ public class LevelSelector {
         button.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Hover effect
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
