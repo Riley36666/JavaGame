@@ -12,24 +12,26 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private final int playerWidth = 50;
     private final int playerHeight = 50;
     private final Set<Integer> pressedKeys = new HashSet<>();
-    private Color playerColor = Color.RED; // default
+    private Color playerColor = Color.RED;
     private Color floorColor = Color.GREEN;
     private int time = 16;
+
     // ---------- Physics ----------
     private double velocityY = 0;
     private final double gravity = 0.6;
     private final double jumpStrength = -12;
     private boolean onGround = false;
+    private int cameraX = 0;
 
     // ---------- Level data ----------
     private final int[][] platforms;
     private final int[][] wincon;
-
     private Timer timer;
     private JFrame frame;
     private boolean gameOver = false;
     private boolean lost = false;
     private int currentlevel;
+
     // ---------- Constructors ----------
     public GamePanel(int[][] platforms, int[][] wincon) {
         this.platforms = platforms;
@@ -50,38 +52,39 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         setFocusable(true);
         addKeyListener(this);
 
-        // Load player color from settings
+        // Load colors
         String colorName = GameSettings.getPlayerColor();
         switch (colorName.toUpperCase()) {
-            case "RED": playerColor = Color.RED; break;
             case "GREEN": playerColor = Color.GREEN; break;
             case "YELLOW": playerColor = Color.YELLOW; break;
             case "BLUE": playerColor = Color.BLUE; break;
             case "PINK": playerColor = Color.PINK; break;
             default: playerColor = Color.RED; break;
         }
+
         String floorColorName = GameSettings.getFloorColor();
         switch (floorColorName.toUpperCase()) {
             case "RED": floorColor = Color.RED; break;
-            case "GREEN": floorColor = Color.GREEN; break;
             case "YELLOW": floorColor = Color.YELLOW; break;
             case "BLUE": floorColor = Color.BLUE; break;
             case "PINK": floorColor = Color.PINK; break;
             default: floorColor = Color.GREEN; break;
         }
-        //FPS Amounnts
+
+        // FPS timing
         int FPS = GameSettings.getFPS();
-        switch (FPS){
+        switch (FPS) {
             case 30: time = 33; break;
             case 60: time = 16; break;
             case 120: time = 8; break;
             case 240: time = 4; break;
         }
+
         timer = new Timer(time, this);
         timer.start();
     }
 
-    // ---------- Entry Point ----------
+    // ---------- Entry point ----------
     public static void start(int level) {
         GamePanel panel = new GamePanel(level);
         JFrame frame = new JFrame("Level " + level);
@@ -102,29 +105,29 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Player
-        g.setColor(playerColor);
-        g.fillRect(playerX, playerY, playerWidth, playerHeight);
-
         // Platforms
         g.setColor(floorColor);
         for (int[] p : platforms) {
-            g.fillRect(p[0], p[1], p[2], p[3]);
+            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
         }
 
         // Win blocks
         g.setColor(Color.YELLOW);
         for (int[] p : wincon) {
-            g.fillRect(p[0], p[1], p[2], p[3]);
+            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
         }
 
-        // Win message
+        // Player
+        g.setColor(playerColor);
+        g.fillRect(playerX - cameraX, playerY, playerWidth, playerHeight);
+
+        // Messages
         if (gameOver) {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("YOU WIN!", getWidth() / 2 - 150, getHeight() / 2);
         }
-        if(lost){
+        if (lost) {
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("LOST!", getWidth() / 2 - 150, getHeight() / 2);
@@ -134,8 +137,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     // ---------- Game Loop ----------
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        if (gameOver) return; // stop updating after win
+        if (gameOver) return;
 
         // Movement
         if (pressedKeys.contains(KeyEvent.VK_LEFT) || pressedKeys.contains(KeyEvent.VK_A))
@@ -153,10 +155,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         velocityY += gravity;
         playerY += velocityY;
 
-        // Collision detection (platforms)
+        // Collision detection
         onGround = false;
         Rectangle playerRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
-
         for (int[] p : platforms) {
             Rectangle platRect = new Rectangle(p[0], p[1], p[2], p[3]);
             if (playerRect.intersects(platRect)) {
@@ -168,17 +169,18 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 }
             }
         }
-        if(playerY > 680) {
+
+        // Lost condition
+        if (playerY > 680) {
             lost = true;
             timer.stop();
             repaint();
-            javax.swing.Timer restartTimer = new javax.swing.Timer(500, e2 -> {
-                start(currentlevel);
-            });
+            javax.swing.Timer restartTimer = new javax.swing.Timer(500, e2 -> start(currentlevel));
             restartTimer.setRepeats(false);
             restartTimer.start();
             return;
         }
+
         // Win condition
         for (int[] p : wincon) {
             Rectangle winRect = new Rectangle(p[0], p[1], p[2], p[3]);
@@ -187,7 +189,6 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 timer.stop();
                 repaint();
 
-                // Wait 5 seconds before restarting
                 javax.swing.Timer restartTimer = new javax.swing.Timer(500, e2 -> {
                     frame.dispose();
                     LevelSelector.open(frame);
@@ -196,6 +197,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 restartTimer.start();
                 return;
             }
+        }
+
+        // Camera follows player
+        if (playerX > 1080) {
+            cameraX = playerX - 1080;
         }
 
         repaint();
