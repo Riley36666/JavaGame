@@ -6,10 +6,11 @@ import java.awt.event.MouseEvent;
 public class LevelSelector {
 
     private static int currentPage = 1;
+    private static int amountofpages = 3;
 
     public static void open(JFrame startFrame) {
         startFrame.setVisible(false);
-        showPage(1); // start with page 1
+        showPage(1);
     }
 
     private static void showPage(int page) {
@@ -37,24 +38,32 @@ public class LevelSelector {
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
         backgroundPanel.add(title, BorderLayout.NORTH);
 
-        JPanel gridPanel = new JPanel(new GridLayout(2, 5, 20, 20));
-        gridPanel.setOpaque(false);
+        // --- Center content ---
+        if (page < amountofpages) {
+            JPanel gridPanel = new JPanel(new GridLayout(2, 5, 20, 20));
+            gridPanel.setOpaque(false);
 
-        // --- determine which levels to show on this page ---
-        int startLevel = (page - 1) * 10 + 1;
-        int endLevel = startLevel + 9;
+            int startLevel = (page - 1) * 10 + 1;
+            int endLevel = startLevel + 9;
 
-        for (int i = startLevel; i <= endLevel; i++) {
-            JButton button = createLevelButton("Level " + i);
-            int level = i;
-            button.addActionListener(e -> {
-                frame.dispose();
-                load(level);
-            });
-            gridPanel.add(button);
+            for (int i = startLevel; i <= endLevel; i++) {
+                JButton button = createLevelButton("Level " + i);
+                int level = i;
+                button.addActionListener(e -> {
+                    frame.dispose();
+                    load(level);
+                });
+                gridPanel.add(button);
+            }
+
+            backgroundPanel.add(gridPanel, BorderLayout.CENTER);
+        } else {
+            // Show WIP message on last page
+            JLabel wipLabel = new JLabel("WIP", SwingConstants.CENTER);
+            wipLabel.setForeground(Color.LIGHT_GRAY);
+            wipLabel.setFont(new Font("Segoe UI", Font.BOLD, 48));
+            backgroundPanel.add(wipLabel, BorderLayout.CENTER);
         }
-
-        backgroundPanel.add(gridPanel, BorderLayout.CENTER);
 
         // --- Bottom navigation panel ---
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -82,9 +91,8 @@ public class LevelSelector {
             });
             navPanel.add(prevPage);
         }
-        //JLabel WIP = new  JLabel("WIP");
 
-        if (page < 2) { // we only have 2 pages
+        if (page < amountofpages) {
             JButton nextPage = new JButton(">");
             styleSecondaryButton(nextPage);
             nextPage.addActionListener(e -> {
@@ -92,7 +100,6 @@ public class LevelSelector {
                 showPage(page + 1);
             });
             navPanel.add(nextPage);
-            //.add(WIP);
         }
 
         bottomPanel.add(navPanel, BorderLayout.EAST);

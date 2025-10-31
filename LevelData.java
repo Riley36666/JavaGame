@@ -101,7 +101,7 @@ public class LevelData {
                 };
             case 11:
                 return new int[][]{
-                        {0, 680, 2500, 40},
+                        {0, 680, 200, 40},
                         {300, 600, 120, 20},
                         {700, 550, 120, 20},
                         {1100, 500, 120, 20},
@@ -206,7 +206,7 @@ public class LevelData {
                         {1900, 200, 100, 20},
                         {2200, 120, 100, 20},
                 };
-
+            // Need to add to level 30
             // --- Default fallback ---
             default:
                 return new int[][]{
@@ -240,6 +240,7 @@ public class LevelData {
             case 18: return new int[][]{{2450, 250, 80, 20}};
             case 19: return new int[][]{{2450, 240, 100, 20}};
             case 20: return new int[][]{{2450, 100, 100, 20}};
+            //Need to add to level 30
             default: return new int[][]{{0, 0, 0, 0}};
         }
     }
