@@ -2,7 +2,7 @@
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow) {
     // Path to your JAR (relative or absolute)
-    const char* cmd = "javaw -jar Game.jar";
+    const char* cmd = "javaw -jar ../finishedjar/Game.jar";
 
     // Start the JAR silently (no console)
     STARTUPINFO si = { sizeof(STARTUPINFO) };

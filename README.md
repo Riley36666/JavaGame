@@ -54,5 +54,7 @@ cd JavaGame
 cd Java
 javac -d classes *.java
 jar cfm finishedjar/Game.jar MANIFEST.MF -C classes . -C images .
+g++ Lancher/launch.cpp -o ../GameLauncher.exe -mwindows
 
-java -jar finishedjar/Game.jar
+```
+Then Run the .exe created
