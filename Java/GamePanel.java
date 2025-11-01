@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
@@ -37,10 +36,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean lost = false;
     private int currentlevel;
     private int UnlockedLevels;
-    // ---------- Background ----------
+
+    // ---------- Background & Floor ----------
     private Image backgroundImage;
     private int bgWidth = 1920;
     private int bgHeight = 1080;
+    private Image floorImage;
 
     // ---------- Constructors ----------
     public GamePanel(int[][] platforms, int[][] wincon, int[][] cactus) {
@@ -69,8 +70,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 GamePanel.class.getResource("/background.png")
         );
         if (backgroundImage == null) {
-            // Fallback for testing in IntelliJ
             backgroundImage = Toolkit.getDefaultToolkit().getImage("images/background.png");
+        }
+
+        // Load floor image safely
+        floorImage = Toolkit.getDefaultToolkit().getImage(
+                GamePanel.class.getResource("/floor.png")
+        );
+        if (floorImage == null) {
+            floorImage = Toolkit.getDefaultToolkit().getImage("images/floor.png");
         }
 
         // Load colors
@@ -82,6 +90,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             case "PINK": playerColor = Color.PINK; break;
             default: playerColor = Color.RED; break;
         }
+
         // load floor color
         String floorColorName = GameSettings.getFloorColor();
         switch (floorColorName.toUpperCase()) {
@@ -91,6 +100,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             case "PINK": floorColor = Color.PINK; break;
             default: floorColor = Color.PINK; break;
         }
+
         // load cactus color
         String cactusColorName = GameSettings.getCactusColor();
         switch (cactusColorName.toUpperCase()) {
@@ -100,7 +110,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             case "PINK": cactusColor = Color.PINK; break;
             default: cactusColor = Color.GREEN; break;
         }
+
         UnlockedLevels = GameSettings.getUnlockedFloors();
+
         // FPS timing
         int FPS = GameSettings.getFPSValue();
         switch (FPS) {
@@ -140,11 +152,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         // Repeat the background seamlessly as the camera scrolls
         if (backgroundImage != null) {
-            int bgX = (int) (-cameraX * 0.5) % bgWidth; // parallax + looping
-            if (bgX > 0) bgX -= bgWidth; // ensure smooth wrap
+            int bgX = (int) (-cameraX * 0.5) % bgWidth;
+            if (bgX > 0) bgX -= bgWidth;
 
             for (int x = bgX; x < getWidth(); x += bgWidth) {
-                // draw image, aligning ground to floor (y=680)
                 g.drawImage(backgroundImage, x, 680 - (bgHeight - 400), bgWidth, bgHeight, this);
             }
         } else {
@@ -152,28 +163,46 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // Platforms
-        g.setColor(floorColor);
+        // ---------- PLATFORM RENDERING (FIXED TILE VERSION) ----------
         for (int[] p : platforms) {
-            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+            if (floorImage != null && floorImage.getWidth(this) > 0) {
+                int imgW = floorImage.getWidth(this);
+                int startX = p[0] - cameraX;
+                int endX = startX + p[2];
+
+                // draw full tiles
+                for (int x = startX; x + imgW <= endX; x += imgW) {
+                    g.drawImage(floorImage, x, p[1], imgW, p[3], this);
+                }
+
+                // draw remainder tile to fill small gap
+                int remainder = (endX - startX) % imgW;
+                if (remainder > 0) {
+                    g.drawImage(floorImage, endX - remainder, p[1], remainder, p[3], this);
+                }
+            } else {
+                g.setColor(floorColor);
+                g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+            }
         }
-        // cactus items
+
+        // ---------- CACTUS ----------
         g.setColor(cactusColor);
         for (int[] p : cactus) {
             g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
         }
 
-        // Win blocks
+        // ---------- WIN BLOCKS ----------
         g.setColor(Color.YELLOW);
         for (int[] p : wincon) {
             g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
         }
 
-        // Player
+        // ---------- PLAYER ----------
         g.setColor(playerColor);
         g.fillRect(playerX - cameraX, playerY, playerWidth, playerHeight);
 
-        // Messages
+        // ---------- MESSAGES ----------
         if (gameOver) {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 48));
@@ -181,7 +210,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
             timer.stop();
             gameOver = false;
-            if(currentlevel == UnlockedLevels){
+            if (currentlevel == UnlockedLevels) {
                 int newlevel = UnlockedLevels + 1;
                 GameSettings.setUnlockedFloors(newlevel);
                 GameSettings.save();
@@ -215,12 +244,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-        // ---------- Game Loop ----------
+    // ---------- Game Loop ----------
     @Override
     public void actionPerformed(ActionEvent e) {
         if (gameOver) return;
 
-        // Movement
         if (pressedKeys.contains(KeyEvent.VK_LEFT) || pressedKeys.contains(KeyEvent.VK_A))
             playerX -= 8;
         if (pressedKeys.contains(KeyEvent.VK_RIGHT) || pressedKeys.contains(KeyEvent.VK_D))
@@ -249,6 +277,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 }
             }
         }
+
         Rectangle platRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
         for (int[] p : cactus) {
             Rectangle cactusRect = new Rectangle(p[0], p[1], p[2], p[3]);
@@ -256,12 +285,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 lost = true;
             }
         }
-        // Lost condition
-        if (playerY > 680) {
-            lost = true;
-        }
 
-        // Win condition
+        if (playerY > 680) lost = true;
+
         for (int[] p : wincon) {
             Rectangle winRect = new Rectangle(p[0], p[1], p[2], p[3]);
             if (playerRect.intersects(winRect)) {
@@ -269,10 +295,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
 
-        // Camera follows player
-        if (playerX > 1080) {
-            cameraX = playerX - 1080;
-        }
+        if (playerX > 1080) cameraX = playerX - 1080;
 
         repaint();
     }

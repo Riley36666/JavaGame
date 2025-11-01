@@ -3,7 +3,7 @@ title Building Java Game
 echo ==========================================
 echo        🚀 Building JavaGame
 echo ==========================================
-del GameLauncher.exe
+del MyGame.exe
 REM --- Step 1: compile Java files ---
 echo [1/5] Compiling Java source files...
 cd Java
@@ -25,14 +25,14 @@ if errorlevel 1 (
 )
 
 REM --- Step 3: copy jar into launcher folder ---
-echo [3/5] Copying JAR into Lancher...
-copy /Y finishedjar\Game.jar Lancher\Game.jar >nul
+echo [3/5] Copying JAR into Launcher...
+copy /Y finishedjar\Game.jar Launcher\Game.jar >nul
 
 REM --- Step 4: compile resources and launcher ---
 echo [4/5] Compiling launcher executable...
-cd Lancher
+cd Launcher
 windres resources.rc -o resources.o
-g++ launch.cpp resources.o -o ../GameLauncher.exe -mwindows
+g++ launch.cpp resources.o -o ../MyGame.exe -mwindows
 if errorlevel 1 (
     echo ❌ Launcher build failed!
     pause
