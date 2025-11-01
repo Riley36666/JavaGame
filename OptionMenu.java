@@ -11,7 +11,7 @@ public class OptionMenu {
         // Create frame
         JFrame frame = new JFrame("Options");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 400);
+        frame.setSize(600, 500);
         frame.setLocationRelativeTo(null);
 
         // Layout setup
@@ -59,21 +59,22 @@ public class OptionMenu {
         floorColorBox.setSelectedItem(GameSettings.getFloorColor());
         panel.add(floorColorBox, gbc);
 
-        // --- Fullscreen checkbox ---
+        // --- Cactus color option ---
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.gridwidth = 2;
-        JCheckBox fullscreenBox = new JCheckBox("Fullscreen Mode");
-        fullscreenBox.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        fullscreenBox.setForeground(Color.WHITE);
-        fullscreenBox.setOpaque(false);
-        fullscreenBox.setSelected(GameSettings.isFullscreen());
-        panel.add(fullscreenBox, gbc);
-        frame.setIconImage(
-                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
-        );
+        JLabel cactusLabel = new JLabel("Cactus Color:");
+        cactusLabel.setForeground(Color.WHITE);
+        cactusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        panel.add(cactusLabel, gbc);
+
+        gbc.gridx = 1;
+        JComboBox<String> cactusColorBox = new JComboBox<>(colors);
+        cactusColorBox.setSelectedItem(GameSettings.getCactusColor());
+        panel.add(cactusColorBox, gbc);
+
+
+
         // --- FPS Limit ---
-        // --- Player color option ---
         gbc.gridwidth = 1;
         gbc.gridy++;
         gbc.gridx = 0;
@@ -87,6 +88,20 @@ public class OptionMenu {
         JComboBox<String> FPSlists = new JComboBox<>(limits);
         FPSlists.setSelectedItem(GameSettings.getFPS());
         panel.add(FPSlists, gbc);
+
+        // --- Fullscreen checkbox ---
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        JCheckBox fullscreenBox = new JCheckBox("Fullscreen Mode");
+        fullscreenBox.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        fullscreenBox.setForeground(Color.WHITE);
+        fullscreenBox.setOpaque(false);
+        fullscreenBox.setSelected(GameSettings.isFullscreen());
+        panel.add(fullscreenBox, gbc);
+        frame.setIconImage(
+                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
+        );
 
         // --- Buttons ---
         gbc.gridwidth = 1;
@@ -105,6 +120,7 @@ public class OptionMenu {
         saveButton.addActionListener((ActionEvent e) -> {
             GameSettings.setPlayerColor((String) playerColorBox.getSelectedItem());
             GameSettings.setFloorColor((String) floorColorBox.getSelectedItem());
+            GameSettings.setCactusColor((String) cactusColorBox.getSelectedItem());
             GameSettings.setFullscreen(fullscreenBox.isSelected());
             GameSettings.setFPS(FPSlists.getSelectedItem().toString());
             GameSettings.save();

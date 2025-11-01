@@ -30,9 +30,10 @@ public class GameSettings {
 
     private static void setDefaults() {
         props.setProperty("player.color", "RED");
-        props.setProperty("floor.color", "GREEN");
+        props.setProperty("floor.color", "PINK");
         props.setProperty("fullscreen", "false");
         props.setProperty("FPS", "60");
+        props.setProperty("cactus.color", "GREEN");
     }
 
     // --- Player color ---
@@ -52,9 +53,6 @@ public class GameSettings {
     public static void setFloorColor(String color) {
         props.setProperty("floor.color", color);
     }
-    public static void setFPS(String fps) {
-        props.setProperty("FPS", fps);
-    }
     // --- Fullscreen ---
     public static boolean isFullscreen() {
         return Boolean.parseBoolean(props.getProperty("fullscreen", "false"));
@@ -64,7 +62,14 @@ public class GameSettings {
         props.setProperty("fullscreen", String.valueOf(fullscreen));
     }
     // --- FPS ---
-    public static int getFPS() {
-        return Integer.parseInt(props.getProperty("FPS", "60"));
+    public static String getFPS() {
+        return props.getProperty("FPS", "60");
     }
+    public static int getFPSValue() {return  Integer.parseInt(props.getProperty("FPS", "60"));}
+    public static void setFPS(String fps) {
+        props.setProperty("FPS", fps);
+    }
+    // --- Cactus color ---
+    public static String getCactusColor() {return props.getProperty("cactus.color", "GREEN");}
+    public static void setCactusColor(String color) { props.setProperty("cactus.color", color); }
 }
