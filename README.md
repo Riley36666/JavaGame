@@ -56,10 +56,10 @@ jar cfm ../finishedjar/Game.jar MANIFEST.MF -C ../classes . -C ../images .
 cd ..
 
 # ⚙️ 3️⃣ Copy the finished JAR into the launcher folder for embedding
-copy finishedjar\Game.jar Lancher\Game.jar
+copy finishedjar\Game.jar Launcher\Game.jar
 
 # 🛠️ 4️⃣ Build the C++ launcher and embed the JAR
-cd Lancher
+cd Launcher
 windres resources.rc -o resources.o
 g++ launch.cpp resources.o -o ../GameLauncher.exe -mwindows
 cd ..

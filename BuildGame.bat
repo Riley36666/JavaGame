@@ -3,7 +3,12 @@ title Building Java Game
 echo ==========================================
 echo        🚀 Building JavaGame
 echo ==========================================
-del MyGame.exe
+REM --- Delete old build if it exists ---
+set "oldgame=..\My Game (WIP name).exe"
+if exist "%oldgame%" (
+    echo Deleting old build...
+    del "%oldgame%"
+)
 REM --- Step 1: compile Java files ---
 echo [1/5] Compiling Java source files...
 cd Java
@@ -32,7 +37,7 @@ REM --- Step 4: compile resources and launcher ---
 echo [4/5] Compiling launcher executable...
 cd Launcher
 windres resources.rc -o resources.o
-g++ launch.cpp resources.o -o ../MyGame.exe -mwindows
+g++ launch.cpp resources.o -o ../"My Game (WIP name)" -mwindows
 if errorlevel 1 (
     echo ❌ Launcher build failed!
     pause
