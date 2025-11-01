@@ -163,7 +163,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // ---------- PLATFORM RENDERING (FIXED TILE VERSION) ----------
+        // ---------- PLATFORM RENDERING ----------
         for (int[] p : platforms) {
             if (floorImage != null && floorImage.getWidth(this) > 0) {
                 int imgW = floorImage.getWidth(this);
@@ -232,7 +232,6 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
             timer.stop();
             lost = false;
-
             new javax.swing.Timer(1000, e2 -> {
                 SwingUtilities.getWindowAncestor(this).dispose();
                 GamePanel.start(currentlevel);
