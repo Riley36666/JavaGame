@@ -25,11 +25,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private final double jumpStrength = -12;
     private boolean onGround = false;
     private int cameraX = 0;
-
+    private boolean hitTramp = false;
     // ---------- Level data ----------
     private final int[][] platforms;
     private final int[][] wincon;
     private final int[][] cactus;
+    private final int[][] trampoline;
     private Timer timer;
     private JFrame frame;
     private boolean gameOver = false;
@@ -44,10 +45,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Image floorImage;
 
     // ---------- Constructors ----------
-    public GamePanel(int[][] platforms, int[][] wincon, int[][] cactus) {
+    public GamePanel(int[][] platforms, int[][] wincon, int[][] cactus, int[][] trampoline) {
         this.platforms = platforms;
         this.wincon = wincon;
         this.cactus = cactus;
+        this.trampoline = trampoline;
         init();
     }
 
@@ -55,6 +57,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         this.platforms = LevelData.getLevel(level);
         this.wincon = LevelData.wincon(level);
         this.cactus = LevelData.cactus(level);
+        this.trampoline = LevelData.trampoline(level);
         this.currentlevel = level;
         init();
     }
@@ -191,6 +194,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         for (int[] p : cactus) {
             g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
         }
+        // ---------- Trampoline ----------
+        g.setColor(Color.BLACK);
+        for(int[] p : trampoline){
+            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+        }
 
         // ---------- WIN BLOCKS ----------
         g.setColor(Color.YELLOW);
@@ -262,6 +270,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         // Apply gravity
         velocityY += gravity;
         playerY += velocityY;
+        // Apply Trampoline
+        if (hitTramp) {
+            velocityY = -20; // bounce upward
+            hitTramp = false;
+        }
+
+
+
 
         // Collision detection
         onGround = false;
@@ -285,8 +301,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
 
-        if (playerY > 680) lost = true;
+        // Trampoline logic
+        // Rectangle platRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
+        for (int[] p: trampoline){
+            Rectangle trampolineRect = new Rectangle(p[0], p[1], p[2], p[3]);
+            if(trampolineRect.intersects(platRect)){
+                hitTramp = true;
+            }
+        }
 
+
+        if (playerY > 680) lost = true;
         for (int[] p : wincon) {
             Rectangle winRect = new Rectangle(p[0], p[1], p[2], p[3]);
             if (playerRect.intersects(winRect)) {
@@ -298,6 +323,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         repaint();
     }
+
+
+
 
     // ---------- Input ----------
     @Override

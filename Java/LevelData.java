@@ -253,4 +253,10 @@ public class LevelData {
         }
         return new int[0][];
     }
+    public static int[][] trampoline(int level){
+        switch (level) {
+            case 1: return new int[][]{{200, 600, 150, 20}};
+        }
+        return new int[0][];
+    }
 }
