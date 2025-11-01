@@ -8,43 +8,31 @@ import java.util.Set;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
-    // ---------- Player settings ----------
-    private int playerX = 100;
-    private int playerY = 630;
-    private final int playerWidth = 50;
-    private final int playerHeight = 50;
+    // Player settings
+    private int playerX = 100, playerY = 630;
+    private final int playerWidth = 50, playerHeight = 50;
     private final Set<Integer> pressedKeys = new HashSet<>();
-    private Color playerColor = Color.RED;
-    private Color floorColor = Color.PINK;
-    private Color cactusColor = Color.GREEN;
+    private Color playerColor = Color.RED, floorColor = Color.PINK, cactusColor = Color.GREEN;
     private int time = 16;
 
-    // ---------- Physics ----------
+    // Physics
     private double velocityY = 0;
-    private final double gravity = 0.6;
-    private final double jumpStrength = -12;
+    private final double gravity = 0.6, jumpStrength = -12;
     private boolean onGround = false;
     private int cameraX = 0;
-    private boolean hitTramp = false;
-    // ---------- Level data ----------
-    private final int[][] platforms;
-    private final int[][] wincon;
-    private final int[][] cactus;
-    private final int[][] trampoline;
+
+    // Level data
+    private final int[][] platforms, wincon, cactus, trampoline;
     private Timer timer;
     private JFrame frame;
-    private boolean gameOver = false;
-    private boolean lost = false;
-    private int currentlevel;
-    private int UnlockedLevels;
+    private boolean gameOver = false, lost = false;
+    private int currentlevel, UnlockedLevels;
 
-    // ---------- Background & Floor ----------
-    private Image backgroundImage;
-    private int bgWidth = 1920;
-    private int bgHeight = 1080;
-    private Image floorImage;
+    // Images
+    private Image backgroundImage, floorImage;
+    private int bgWidth = 1920, bgHeight = 1080;
 
-    // ---------- Constructors ----------
+    // Constructors
     public GamePanel(int[][] platforms, int[][] wincon, int[][] cactus, int[][] trampoline) {
         this.platforms = platforms;
         this.wincon = wincon;
@@ -62,31 +50,21 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         init();
     }
 
-    // ---------- Shared setup ----------
     private void init() {
         setBackground(Color.BLACK);
         setFocusable(true);
         addKeyListener(this);
 
-        // Load background image
-        backgroundImage = Toolkit.getDefaultToolkit().getImage(
-                GamePanel.class.getResource("/background.png")
-        );
-        if (backgroundImage == null) {
+        backgroundImage = Toolkit.getDefaultToolkit().getImage(GamePanel.class.getResource("/background.png"));
+        if (backgroundImage == null)
             backgroundImage = Toolkit.getDefaultToolkit().getImage("images/background.png");
-        }
 
-        // Load floor image safely
-        floorImage = Toolkit.getDefaultToolkit().getImage(
-                GamePanel.class.getResource("/floor.png")
-        );
-        if (floorImage == null) {
+        floorImage = Toolkit.getDefaultToolkit().getImage(GamePanel.class.getResource("/floor.png"));
+        if (floorImage == null)
             floorImage = Toolkit.getDefaultToolkit().getImage("images/floor.png");
-        }
 
-        // Load colors
-        String colorName = GameSettings.getPlayerColor();
-        switch (colorName.toUpperCase()) {
+        // Colors
+        switch (GameSettings.getPlayerColor().toUpperCase()) {
             case "GREEN": playerColor = Color.GREEN; break;
             case "YELLOW": playerColor = Color.YELLOW; break;
             case "BLUE": playerColor = Color.BLUE; break;
@@ -94,9 +72,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             default: playerColor = Color.RED; break;
         }
 
-        // load floor color
-        String floorColorName = GameSettings.getFloorColor();
-        switch (floorColorName.toUpperCase()) {
+        switch (GameSettings.getFloorColor().toUpperCase()) {
             case "RED": floorColor = Color.RED; break;
             case "YELLOW": floorColor = Color.YELLOW; break;
             case "BLUE": floorColor = Color.BLUE; break;
@@ -104,9 +80,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             default: floorColor = Color.PINK; break;
         }
 
-        // load cactus color
-        String cactusColorName = GameSettings.getCactusColor();
-        switch (cactusColorName.toUpperCase()) {
+        switch (GameSettings.getCactusColor().toUpperCase()) {
             case "RED": cactusColor = Color.RED; break;
             case "YELLOW": cactusColor = Color.YELLOW; break;
             case "BLUE": cactusColor = Color.BLUE; break;
@@ -117,8 +91,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         UnlockedLevels = GameSettings.getUnlockedFloors();
 
         // FPS timing
-        int FPS = GameSettings.getFPSValue();
-        switch (FPS) {
+        switch (GameSettings.getFPSValue()) {
             case 30: time = 33; break;
             case 60: time = 16; break;
             case 120: time = 8; break;
@@ -129,7 +102,6 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         timer.start();
     }
 
-    // ---------- Entry point ----------
     public static void start(int level) {
         GamePanel panel = new GamePanel(level);
         JFrame frame = new JFrame("Level " + level);
@@ -139,97 +111,70 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         frame.add(panel);
         panel.setFrame(frame);
         frame.setVisible(true);
-        frame.setIconImage(
-                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
-        );
+        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png")));
     }
 
     public void setFrame(JFrame frame) {
         this.frame = frame;
     }
 
-    // ---------- Rendering ----------
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Repeat the background seamlessly as the camera scrolls
         if (backgroundImage != null) {
             int bgX = (int) (-cameraX * 0.5) % bgWidth;
             if (bgX > 0) bgX -= bgWidth;
-
-            for (int x = bgX; x < getWidth(); x += bgWidth) {
+            for (int x = bgX; x < getWidth(); x += bgWidth)
                 g.drawImage(backgroundImage, x, 680 - (bgHeight - 400), bgWidth, bgHeight, this);
-            }
         } else {
             g.setColor(Color.CYAN);
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // ---------- PLATFORM RENDERING ----------
+        // Platforms
         for (int[] p : platforms) {
             if (floorImage != null && floorImage.getWidth(this) > 0) {
                 int imgW = floorImage.getWidth(this);
                 int startX = p[0] - cameraX;
                 int endX = startX + p[2];
-
-                // draw full tiles
-                for (int x = startX; x + imgW <= endX; x += imgW) {
+                for (int x = startX; x + imgW <= endX; x += imgW)
                     g.drawImage(floorImage, x, p[1], imgW, p[3], this);
-                }
-
-                // draw remainder tile to fill small gap
                 int remainder = (endX - startX) % imgW;
-                if (remainder > 0) {
+                if (remainder > 0)
                     g.drawImage(floorImage, endX - remainder, p[1], remainder, p[3], this);
-                }
             } else {
                 g.setColor(floorColor);
                 g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
             }
         }
 
-        // ---------- CACTUS ----------
         g.setColor(cactusColor);
-        for (int[] p : cactus) {
-            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
-        }
-        // ---------- Trampoline ----------
+        for (int[] p : cactus) g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+
         g.setColor(Color.BLACK);
-        for(int[] p : trampoline){
-            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
-        }
+        for (int[] p : trampoline) g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
 
-        // ---------- WIN BLOCKS ----------
         g.setColor(Color.YELLOW);
-        for (int[] p : wincon) {
-            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
-        }
+        for (int[] p : wincon) g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
 
-        // ---------- PLAYER ----------
         g.setColor(playerColor);
         g.fillRect(playerX - cameraX, playerY, playerWidth, playerHeight);
 
-        // ---------- MESSAGES ----------
         if (gameOver) {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("YOU WIN!", getWidth() / 2 - 150, getHeight() / 2);
-
             timer.stop();
             gameOver = false;
             if (currentlevel == UnlockedLevels) {
-                int newlevel = UnlockedLevels + 1;
-                GameSettings.setUnlockedFloors(newlevel);
+                GameSettings.setUnlockedFloors(UnlockedLevels + 1);
                 GameSettings.save();
             }
             new javax.swing.Timer(1000, e2 -> {
                 SwingUtilities.getWindowAncestor(this).dispose();
                 LevelSelector.open(new JFrame());
-            }) {{
-                setRepeats(false);
-                start();
-            }};
+            }) {{ setRepeats(false); start(); }};
             return;
         }
 
@@ -237,51 +182,51 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("LOST!", getWidth() / 2 - 150, getHeight() / 2);
-
             timer.stop();
             lost = false;
             new javax.swing.Timer(1000, e2 -> {
                 SwingUtilities.getWindowAncestor(this).dispose();
                 GamePanel.start(currentlevel);
-            }) {{
-                setRepeats(false);
-                start();
-            }};
-            return;
+            }) {{ setRepeats(false); start(); }};
         }
     }
 
-    // ---------- Game Loop ----------
     @Override
     public void actionPerformed(ActionEvent e) {
         if (gameOver) return;
 
-        if (pressedKeys.contains(KeyEvent.VK_LEFT) || pressedKeys.contains(KeyEvent.VK_A))
-            playerX -= 8;
-        if (pressedKeys.contains(KeyEvent.VK_RIGHT) || pressedKeys.contains(KeyEvent.VK_D))
-            playerX += 8;
-        if ((pressedKeys.contains(KeyEvent.VK_SPACE) ||
-                pressedKeys.contains(KeyEvent.VK_W) ||
+        if (pressedKeys.contains(KeyEvent.VK_LEFT) || pressedKeys.contains(KeyEvent.VK_A)) playerX -= 8;
+        if (pressedKeys.contains(KeyEvent.VK_RIGHT) || pressedKeys.contains(KeyEvent.VK_D)) playerX += 8;
+        if ((pressedKeys.contains(KeyEvent.VK_SPACE) || pressedKeys.contains(KeyEvent.VK_W) ||
                 pressedKeys.contains(KeyEvent.VK_UP)) && onGround) {
             velocityY = jumpStrength;
             onGround = false;
         }
 
-        // Apply gravity
         velocityY += gravity;
         playerY += velocityY;
-        // Apply Trampoline
-        if (hitTramp) {
-            velocityY = -20; // bounce upward
-            hitTramp = false;
-        }
 
-
-
-
-        // Collision detection
+        // --- Collision detection ---
         onGround = false;
         Rectangle playerRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
+
+        // Trampoline first
+        for (int[] p : trampoline) {
+            Rectangle trampRect = new Rectangle(p[0], p[1], p[2], p[3]);
+            if (playerRect.intersects(trampRect)) {
+                int playerBottom = playerRect.y + playerRect.height;
+                int trampTop = trampRect.y;
+                boolean fromAbove = (playerBottom - velocityY) <= trampTop;
+                if (fromAbove && velocityY > 0) {
+                    playerY = trampTop - playerHeight;
+                    velocityY = -18;
+                    onGround = false;
+                }
+            }
+        }
+
+        // Platforms
+        playerRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
         for (int[] p : platforms) {
             Rectangle platRect = new Rectangle(p[0], p[1], p[2], p[3]);
             if (playerRect.intersects(platRect)) {
@@ -293,41 +238,23 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
 
-        Rectangle platRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
+        // Cactus
         for (int[] p : cactus) {
-            Rectangle cactusRect = new Rectangle(p[0], p[1], p[2], p[3]);
-            if (cactusRect.intersects(platRect)) {
-                lost = true;
-            }
+            Rectangle cRect = new Rectangle(p[0], p[1], p[2], p[3]);
+            if (cRect.intersects(playerRect)) lost = true;
         }
 
-        // Trampoline logic
-        // Rectangle platRect = new Rectangle(playerX, playerY, playerWidth, playerHeight);
-        for (int[] p: trampoline){
-            Rectangle trampolineRect = new Rectangle(p[0], p[1], p[2], p[3]);
-            if(trampolineRect.intersects(platRect)){
-                hitTramp = true;
-            }
+        // Win
+        for (int[] p : wincon) {
+            Rectangle wRect = new Rectangle(p[0], p[1], p[2], p[3]);
+            if (playerRect.intersects(wRect)) gameOver = true;
         }
-
 
         if (playerY > 680) lost = true;
-        for (int[] p : wincon) {
-            Rectangle winRect = new Rectangle(p[0], p[1], p[2], p[3]);
-            if (playerRect.intersects(winRect)) {
-                gameOver = true;
-            }
-        }
-
         if (playerX > 1080) cameraX = playerX - 1080;
-
         repaint();
     }
 
-
-
-
-    // ---------- Input ----------
     @Override
     public void keyPressed(KeyEvent e) {
         pressedKeys.add(e.getKeyCode());
