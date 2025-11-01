@@ -46,15 +46,26 @@ This project helped me understand:
 ### 🧩 Running from the Command Line
 
 ```bash
-# 1️⃣ Clone the repository
-git clone https://github.com/Riley36666/JavaGame.git
-cd JavaGame
+# 🧩 1️⃣ Go to the project folder
+cd "C:\Users\riley\Desktop\github\my projects\Full Game"
 
-# 2️⃣ Compile all Java source files into a 'classes' folder
+# 🧠 2️⃣ Compile all Java files and build the JAR
 cd Java
-javac -d classes *.java
-jar cfm finishedjar/Game.jar MANIFEST.MF -C classes . -C images .
-g++ Lancher/launch.cpp -o ../GameLauncher.exe -mwindows
+javac -d ../classes *.java
+jar cfm ../finishedjar/Game.jar MANIFEST.MF -C ../classes . -C ../images .
+cd ..
+
+# ⚙️ 3️⃣ Copy the finished JAR into the launcher folder for embedding
+copy finishedjar\Game.jar Lancher\Game.jar
+
+# 🛠️ 4️⃣ Build the C++ launcher and embed the JAR
+cd Lancher
+windres resources.rc -o resources.o
+g++ launch.cpp resources.o -o ../GameLauncher.exe -mwindows
+cd ..
+
+# ▶️ 5️⃣ Run your game!
+GameLauncher.exe
 
 ```
 Then Run the .exe created
