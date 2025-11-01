@@ -51,10 +51,8 @@ git clone https://github.com/Riley36666/JavaGame.git
 cd JavaGame
 
 # 2️⃣ Compile all Java source files into a 'classes' folder
+cd Java
 javac -d classes *.java
-
-# 3️⃣ Package everything into a runnable JAR
 jar cfm finishedjar/Game.jar MANIFEST.MF -C classes . -C images .
 
-# 4️⃣ Run the game!
 java -jar finishedjar/Game.jar
