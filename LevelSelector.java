@@ -6,7 +6,11 @@ import java.awt.event.MouseEvent;
 public class LevelSelector {
 
     private static int currentPage = 1;
-    private static int amountofpages = 3;
+    private static final int amountofpages = 3;
+    private static int getUnlockedLevels() {
+        return GameSettings.getUnlockedFloors();
+    }
+
 
     public static void open(JFrame startFrame) {
         startFrame.setVisible(false);
@@ -21,6 +25,7 @@ public class LevelSelector {
         frame.setIconImage(
                 Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
         );
+
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -35,10 +40,23 @@ public class LevelSelector {
         backgroundPanel.setLayout(new BorderLayout(0, 40));
         backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 80, 40, 80));
 
+        // --- Title & unlocked label ---
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setOpaque(false);
+
         JLabel title = new JLabel("Select a Level", SwingConstants.CENTER);
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
-        backgroundPanel.add(title, BorderLayout.NORTH);
+
+        JLabel unlockedLabel = new JLabel("Unlocked Levels: " + getUnlockedLevels());
+        unlockedLabel.setForeground(Color.WHITE);
+        unlockedLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        unlockedLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        unlockedLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 20));
+
+        topPanel.add(title, BorderLayout.CENTER);
+        topPanel.add(unlockedLabel, BorderLayout.EAST);
+        backgroundPanel.add(topPanel, BorderLayout.NORTH);
 
         // --- Center content ---
         if (page < amountofpages) {
@@ -52,15 +70,23 @@ public class LevelSelector {
                 JButton button = createLevelButton("Level " + i);
                 int level = i;
                 button.addActionListener(e -> {
-                    frame.dispose();
-                    load(level);
+                            if (level <= getUnlockedLevels()) {
+                        frame.dispose();
+                        load(level);
+                    } else {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                "You don’t have this level unlocked yet!",
+                                "Locked Level",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
                 });
                 gridPanel.add(button);
             }
 
             backgroundPanel.add(gridPanel, BorderLayout.CENTER);
         } else {
-            // Show WIP message on last page
             JLabel wipLabel = new JLabel("WIP", SwingConstants.CENTER);
             wipLabel.setForeground(Color.LIGHT_GRAY);
             wipLabel.setFont(new Font("Segoe UI", Font.BOLD, 48));
@@ -71,7 +97,6 @@ public class LevelSelector {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
 
-        // Left: Back to Start button
         JButton backButton = new JButton("Back");
         styleSecondaryButton(backButton);
         backButton.addActionListener(e -> {
@@ -80,7 +105,6 @@ public class LevelSelector {
         });
         bottomPanel.add(backButton, BorderLayout.WEST);
 
-        // Right: Page navigation buttons
         JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         navPanel.setOpaque(false);
 

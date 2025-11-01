@@ -34,7 +34,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean gameOver = false;
     private boolean lost = false;
     private int currentlevel;
-
+    private int UnlockedLevels;
     // ---------- Background ----------
     private Image backgroundImage;
     private int bgWidth = 1920;
@@ -98,7 +98,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             case "PINK": cactusColor = Color.PINK; break;
             default: cactusColor = Color.GREEN; break;
         }
-
+        UnlockedLevels = GameSettings.getUnlockedFloors();
         // FPS timing
         int FPS = GameSettings.getFPSValue();
         switch (FPS) {
@@ -179,7 +179,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
             timer.stop();
             gameOver = false;
-
+            if(currentlevel == UnlockedLevels){
+                int newlevel = UnlockedLevels + 1;
+                GameSettings.setUnlockedFloors(newlevel);
+                GameSettings.save();
+            }
             new javax.swing.Timer(1000, e2 -> {
                 SwingUtilities.getWindowAncestor(this).dispose();
                 LevelSelector.open(new JFrame());

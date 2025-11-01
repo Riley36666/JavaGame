@@ -247,7 +247,7 @@ public class LevelData {
     // x,y width, height
     public static int[][] cactus(int level) {
         switch (level) {
-            case 1: return new int[][]{{200, 550, 20, 100}};
+            //case 1: return new int[][]{{200, 550, 20, 100}};
         }
         return new int[0][];
     }

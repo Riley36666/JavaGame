@@ -34,6 +34,7 @@ public class GameSettings {
         props.setProperty("fullscreen", "false");
         props.setProperty("FPS", "60");
         props.setProperty("cactus.color", "GREEN");
+        props.setProperty("floors.unlocked", "1");
     }
 
     // --- Player color ---
@@ -72,4 +73,7 @@ public class GameSettings {
     // --- Cactus color ---
     public static String getCactusColor() {return props.getProperty("cactus.color", "GREEN");}
     public static void setCactusColor(String color) { props.setProperty("cactus.color", color); }
+    // --- Unlocked floors ---
+    public static int getUnlockedFloors() {return  Integer.parseInt(props.getProperty("floors.unlocked", "1"));}
+    public static void setUnlockedFloors(int floors) {props.setProperty("floors.unlocked", String.valueOf(floors));}
 }
