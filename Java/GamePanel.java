@@ -20,7 +20,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private final double gravity = 0.6, jumpStrength = -12;
     private boolean onGround = false;
     private int cameraX = 0;
-
+    private int cameraY = 0;
     // Level data
     private final int[][] platforms, wincon, cactus, trampoline;
     private Timer timer;
@@ -122,6 +122,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Background
         if (backgroundImage != null) {
             int bgX = (int) (-cameraX * 0.5) % bgWidth;
             if (bgX > 0) bgX -= bgWidth;
@@ -132,35 +133,54 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // Platforms
+// --- FIXED FLOOR DRAWING: Texture exactly matches platform bounds ---
         for (int[] p : platforms) {
-            if (floorImage != null && floorImage.getWidth(this) > 0) {
+            if (floorImage != null && floorImage.getWidth(this) > 0 && floorImage.getHeight(this) > 0) {
                 int imgW = floorImage.getWidth(this);
+                int imgH = floorImage.getHeight(this);
                 int startX = p[0] - cameraX;
                 int endX = startX + p[2];
-                for (int x = startX; x + imgW <= endX; x += imgW)
-                    g.drawImage(floorImage, x, p[1], imgW, p[3], this);
-                int remainder = (endX - startX) % imgW;
-                if (remainder > 0)
-                    g.drawImage(floorImage, endX - remainder, p[1], remainder, p[3], this);
+                int startY = p[1];
+                int endY = startY + p[3];
+
+                // Fill only the platform area
+                for (int y = startY; y < endY; y += imgH) {
+                    for (int x = startX; x < endX; x += imgW) {
+                        int drawW = Math.min(imgW, endX - x);
+                        int drawH = Math.min(imgH, endY - y);
+                        g.drawImage(floorImage, x, y, x + drawW, y + drawH,
+                                0, 0, drawW, drawH, this);
+                    }
+                }
             } else {
                 g.setColor(floorColor);
                 g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
             }
         }
 
+
+
+
+        // Cactus
         g.setColor(cactusColor);
-        for (int[] p : cactus) g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+        for (int[] p : cactus)
+            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
 
+        // Trampolines
         g.setColor(Color.BLACK);
-        for (int[] p : trampoline) g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+        for (int[] p : trampoline)
+            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
 
+        // Win zones
         g.setColor(Color.YELLOW);
-        for (int[] p : wincon) g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
+        for (int[] p : wincon)
+            g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
 
+        // Player
         g.setColor(playerColor);
         g.fillRect(playerX - cameraX, playerY, playerWidth, playerHeight);
 
+        // Game over / lost messages
         if (gameOver) {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 48));
@@ -174,7 +194,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             new javax.swing.Timer(1000, e2 -> {
                 SwingUtilities.getWindowAncestor(this).dispose();
                 LevelSelector.open(new JFrame());
-            }) {{ setRepeats(false); start(); }};
+            }) {{
+                setRepeats(false);
+                start();
+            }};
             return;
         }
 
@@ -187,7 +210,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             new javax.swing.Timer(1000, e2 -> {
                 SwingUtilities.getWindowAncestor(this).dispose();
                 GamePanel.start(currentlevel);
-            }) {{ setRepeats(false); start(); }};
+            }) {{
+                setRepeats(false);
+                start();
+            }};
         }
     }
 
@@ -259,9 +285,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent e) {
         pressedKeys.add(e.getKeyCode());
         if (e.getKeyCode() == KeyEvent.VK_Q) {
-            if (frame != null) frame.dispose();
-            LevelSelector.open(frame);
-        }
+            if (frame != null) {
+                if (!gameOver) {
+                    if (!lost){
+                    frame.dispose();
+                    LevelSelector.open(frame);
+        }}}}
     }
 
     @Override

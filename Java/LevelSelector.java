@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
 public class LevelSelector {
 
     private static int currentPage = 1;
-    private static final int amountofpages = 3;
+    private static final int amountofpages = 4;
     private static int getUnlockedLevels() {
         return GameSettings.getUnlockedFloors();
     }
