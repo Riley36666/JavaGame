@@ -4,15 +4,33 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 public class LevelSelector {
 
+    private static int levelCount;
     private static int currentPage = 1;
-    private static final int amountofpages = 4;
+    private static int amountOfPages; // not final, computed after levelCount is set
+
     private static int getUnlockedLevels() {
         return GameSettings.getUnlockedFloors();
     }
 
+    static {
+        File dir = new File("levels"); // replace with your actual directory path
+        String[] files = dir.list();
+        if (files != null) {
+            levelCount = files.length;
+        } else {
+            levelCount = 0;
+        }
+        amountOfPages = mathForPages(levelCount); // compute after levelCount is ready
+    }
+
+    private static int mathForPages(int levelCount) {
+        // Use ceiling division so leftover levels still count as a page
+        return (int) Math.ceil(levelCount / 10.0);
+    }
 
     public static void open(JFrame startFrame) {
         startFrame.setVisible(false);
@@ -40,7 +58,6 @@ public class LevelSelector {
             }
         };
         backgroundPanel.setLayout(new BorderLayout(0, 40));
-        backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 80, 40, 80));
 
         // --- Title & unlocked label ---
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -61,18 +78,18 @@ public class LevelSelector {
         backgroundPanel.add(topPanel, BorderLayout.NORTH);
 
         // --- Center content ---
-        if (page < amountofpages) {
+        if (page <= amountOfPages) {
             JPanel gridPanel = new JPanel(new GridLayout(2, 5, 20, 20));
             gridPanel.setOpaque(false);
 
             int startLevel = (page - 1) * 10 + 1;
-            int endLevel = startLevel + 9;
+            int endLevel = Math.min(startLevel + 9, levelCount); // cap at total levels
 
             for (int i = startLevel; i <= endLevel; i++) {
                 JButton button = createLevelButton("Level " + i);
                 int level = i;
                 button.addActionListener(e -> {
-                            if (level <= getUnlockedLevels()) {
+                    if (level <= getUnlockedLevels()) {
                         frame.dispose();
                         load(level);
                     } else {
@@ -120,7 +137,7 @@ public class LevelSelector {
             navPanel.add(prevPage);
         }
 
-        if (page < amountofpages) {
+        if (page < amountOfPages) {
             JButton nextPage = new JButton(">");
             styleSecondaryButton(nextPage);
             nextPage.addActionListener(e -> {

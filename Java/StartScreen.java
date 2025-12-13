@@ -40,21 +40,25 @@ public class StartScreen {
         JButton startButton = createButton("Start Game");
         JButton optionsButton = createButton("Options");
         JButton exitButton = createButton("Exit Game");
-
+        JButton levelbuilder = createButton("Level Builder");
         // --- Button actions ---
         startButton.addActionListener(e -> {
-            System.out.println("Start button pressed!");
+            //System.out.println("Start button pressed!");
             LevelSelector.open(frame);
             frame.dispose();
         });
 
         optionsButton.addActionListener(e -> {
-            System.out.println("Options button pressed!");
+            //System.out.println("Options button pressed!");
             OptionMenu.open(frame);
+            frame.dispose();
         });
-
+        levelbuilder.addActionListener(e -> {
+            LevelMakerSelector.open();
+            frame.dispose();
+        });
         exitButton.addActionListener(e -> {
-            System.out.println("Exit button pressed!");
+            //System.out.println("Exit button pressed!");
             frame.dispose();
         });
 
@@ -62,6 +66,8 @@ public class StartScreen {
         panel.add(title);
         panel.add(Box.createVerticalStrut(60));
         panel.add(startButton);
+        panel.add(Box.createVerticalStrut(30));
+        panel.add(levelbuilder);
         panel.add(Box.createVerticalStrut(30));
         panel.add(optionsButton);
         panel.add(Box.createVerticalStrut(30));
