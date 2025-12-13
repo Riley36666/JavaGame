@@ -13,6 +13,9 @@ public class Editor {
         private final int tileSize = 32;
         private final int[][] tiles;
         private int currentTileType = 1;
+        private int playerX = 100; // Default player X
+        private int playerY = 630; // Default player Y
+        private boolean placingPlayer = false;
 
         public LevelCanvas() {
             tiles = new int[rows][cols];
@@ -26,6 +29,15 @@ public class Editor {
                     int row = e.getY() / tileSize;
 
                     if (row >= 0 && row < rows && col >= 0 && col < cols) {
+                        if (placingPlayer) {
+                            // Set player position (not stored in tiles array)
+                            playerX = col * tileSize;
+                            playerY = row * tileSize;
+                            placingPlayer = false;
+                            repaint();
+                            return;
+                        }
+
                         if (SwingUtilities.isRightMouseButton(e)) {
                             tiles[row][col] = 0; // erase
                         } else {
@@ -41,8 +53,22 @@ public class Editor {
             return tiles;
         }
 
+        public int getPlayerX() {
+            return playerX;
+        }
+
+        public int getPlayerY() {
+            return playerY;
+        }
+
         public void setCurrentTileType(int type) {
             currentTileType = type;
+            placingPlayer = false;
+        }
+
+        public void setPlacingPlayer(boolean placing) {
+            placingPlayer = placing;
+            if (placing) currentTileType = -1; // Special value for player
         }
 
         @Override
@@ -64,6 +90,17 @@ public class Editor {
                     g.drawRect(c * tileSize, r * tileSize, tileSize, tileSize);
                 }
             }
+
+            // Draw player position
+            g.setColor(Color.BLUE);
+            g.fillOval(playerX, playerY, tileSize, tileSize);
+            g.setColor(Color.WHITE);
+            g.drawOval(playerX, playerY, tileSize, tileSize);
+
+            // Draw grid coordinates for reference
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.PLAIN, 8));
+            g.drawString("Player: (" + playerX + "," + playerY + ")", 5, 15);
         }
     }
 
@@ -74,24 +111,30 @@ public class Editor {
         LevelCanvas canvas = new LevelCanvas();
 
         JPanel toolbar = new JPanel();
+        JButton playerBtn = new JButton("Set Player");
         JButton platform = new JButton("Platform");
         JButton cactus = new JButton("Cactus");
         JButton tramp = new JButton("Trampoline");
         JButton win = new JButton("Win");
+        JButton erase = new JButton("Erase");
 
+        playerBtn.addActionListener(e -> canvas.setPlacingPlayer(true));
         platform.addActionListener(e -> canvas.setCurrentTileType(1));
         cactus.addActionListener(e -> canvas.setCurrentTileType(2));
         tramp.addActionListener(e -> canvas.setCurrentTileType(4));
         win.addActionListener(e -> canvas.setCurrentTileType(5));
+        erase.addActionListener(e -> canvas.setCurrentTileType(0));
 
+        toolbar.add(playerBtn);
         toolbar.add(platform);
         toolbar.add(cactus);
         toolbar.add(tramp);
         toolbar.add(win);
+        toolbar.add(erase);
 
         JButton save = new JButton("Save");
         save.addActionListener(e -> {
-            LevelSaver.saveFromTiles(level, canvas.getTiles(), 32);
+            LevelSaver.saveFromTiles(level, canvas.getTiles(), 32, canvas.getPlayerX(), canvas.getPlayerY());
             JOptionPane.showMessageDialog(frame, "Level Saved!");
             frame.dispose();
             StartScreen.startscreen();

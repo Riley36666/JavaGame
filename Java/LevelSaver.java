@@ -8,15 +8,19 @@ public class LevelSaver {
 
     private static final String LEVEL_FOLDER = "levels/";
 
-    public static void saveFromTiles(int level, int[][] tiles, int tileSize) {
+    public static void saveFromTiles(int level, int[][] tiles, int tileSize, int playerX, int playerY) {
         String path = LEVEL_FOLDER + "level" + level + ".txt";
 
         try (FileWriter fw = new FileWriter(path)) {
             fw.write("# Level " + level + "\n");
+            fw.write("# PLAYER x y\n");
             fw.write("# PLATFORM x y w h\n");
             fw.write("# CACTUS x y w h\n");
             fw.write("# TRAMP x y w h\n");
             fw.write("# WIN x y w h\n");
+            playerY = playerY + 1;
+            // Save player position
+            fw.write("PLAYER " + playerX + " " + playerY + "\n");
 
             for (int r = 0; r < tiles.length; r++) {
                 for (int c = 0; c < tiles[r].length; c++) {
@@ -36,7 +40,8 @@ public class LevelSaver {
             e.printStackTrace();
         }
     }
-    public static void createDefualt() {
+
+    public static void createDefault() {
         System.out.println("Creating default levels...");
 
         for (int i = 0; i < 3; i++) {
@@ -44,18 +49,20 @@ public class LevelSaver {
             saveEmpty(level);
         }
     }
+
     public static void saveEmpty(int level) {
         ensureFolderExists();
 
         String path = LEVEL_FOLDER + "level" + level + ".txt";
 
         try (FileWriter fw = new FileWriter(path)) {
-
             fw.write("# Level " + level + "\n");
+            fw.write("# PLAYER x y\n");
             fw.write("# PLATFORM x y w h\n");
             fw.write("# CACTUS x y w h\n");
             fw.write("# TRAMP x y w h\n");
             fw.write("# WIN x y w h\n\n");
+            fw.write("PLAYER 100 630\n");
             fw.write("PLATFORM 0 680 3000 50\n");
             fw.write("WIN 2800 630 50 50\n");
             System.out.println("Created level " + level);
@@ -63,8 +70,13 @@ public class LevelSaver {
             e.printStackTrace();
         }
     }
+
     private static void ensureFolderExists() {
         File folder = new File(LEVEL_FOLDER);
         if (!folder.exists()) {
-            folder.mkdirs();}
-}}
+            folder.mkdirs();
+        }
+    }
+
+
+}

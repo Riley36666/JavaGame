@@ -9,7 +9,7 @@ import java.util.Set;
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     // Player settings
-    private int playerX = 100, playerY = 630;
+    private int playerX, playerY;
     private final int playerWidth = 50, playerHeight = 50;
     private final Set<Integer> pressedKeys = new HashSet<>();
     private Color playerColor = Color.RED, floorColor = Color.PINK, cactusColor = Color.GREEN;
@@ -21,6 +21,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean onGround = false;
     private int cameraX = 0;
     private int cameraY = 0;
+    private int levelBottom; // Dynamic bottom for each level
+
     // Level data
     private final int[][] platforms, wincon, cactus, trampoline;
     private Timer timer;
@@ -33,11 +35,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private int bgWidth = 1920, bgHeight = 1080;
 
     // Constructors
-    public GamePanel(int[][] platforms, int[][] wincon, int[][] cactus, int[][] trampoline) {
+    public GamePanel(int[][] platforms, int[][] wincon, int[][] cactus, int[][] trampoline, int startX, int startY) {
         this.platforms = platforms;
         this.wincon = wincon;
         this.cactus = cactus;
         this.trampoline = trampoline;
+        this.playerX = startX;
+        this.playerY = startY;
+        this.levelBottom = calculateLevelBottom();
         init();
     }
 
@@ -47,7 +52,22 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         this.cactus = LevelData.cactus(level);
         this.trampoline = LevelData.trampoline(level);
         this.currentlevel = level;
+
+        int[] startPos = LevelData.playerStart(level);
+        this.playerX = startPos[0];
+        this.playerY = startPos[1];
+        this.levelBottom = LevelData.getLevelBottom(level);
+
         init();
+    }
+
+    private int calculateLevelBottom() {
+        int bottom = 0;
+        for (int[] p : platforms) {
+            bottom = Math.max(bottom, p[1] + p[3]);
+        }
+        // Add some buffer below the lowest platform
+        return bottom + 200;
     }
 
     private void init() {
@@ -133,7 +153,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-// --- FIXED FLOOR DRAWING: Texture exactly matches platform bounds ---
+        // --- FLOOR DRAWING ---
         for (int[] p : platforms) {
             if (floorImage != null && floorImage.getWidth(this) > 0 && floorImage.getHeight(this) > 0) {
                 int imgW = floorImage.getWidth(this);
@@ -157,9 +177,6 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 g.fillRect(p[0] - cameraX, p[1], p[2], p[3]);
             }
         }
-
-
-
 
         // Cactus
         g.setColor(cactusColor);
@@ -276,7 +293,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             if (playerRect.intersects(wRect)) gameOver = true;
         }
 
-        if (playerY > 680) lost = true;
+        // Dynamic bottom check - fall below the lowest platform
+        if (playerY > levelBottom) lost = true;
+
         if (playerX > 1080) cameraX = playerX - 1080;
         repaint();
     }
@@ -288,9 +307,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             if (frame != null) {
                 if (!gameOver) {
                     if (!lost){
-                    frame.dispose();
-                    LevelSelector.open(frame);
-        }}}}
+                        frame.dispose();
+                        LevelSelector.open(frame);
+                    }}}}
     }
 
     @Override
