@@ -66,7 +66,9 @@ public class Editor {
         editor.setSize(1000, 700);
         editor.setLocationRelativeTo(null);
         editor.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+        editor.setIconImage(
+                Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
+        );
         LevelCanvas canvas = new LevelCanvas();
 
         // Toolbar for tile selection
