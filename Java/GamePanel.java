@@ -12,7 +12,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private int playerX, playerY;
     private final int playerWidth = 50, playerHeight = 50;
     private final Set<Integer> pressedKeys = new HashSet<>();
-    private Color playerColor = Color.RED, floorColor = Color.PINK, cactusColor = Color.GREEN;
+    private Color playerColor = Color.RED;
+    private static Color floorColor = Color.PINK;
+    private static Color cactusColor = Color.GREEN;
     private int time = 16;
 
     // Physics
@@ -132,6 +134,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         panel.setFrame(frame);
         frame.setVisible(true);
         frame.setIconImage(Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png")));
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     public void setFrame(JFrame frame) {
@@ -304,6 +307,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent e) {
         pressedKeys.add(e.getKeyCode());
         if (e.getKeyCode() == KeyEvent.VK_Q) {
+            frame.dispose();
             if (frame != null) {
                 if (!gameOver) {
                     if (!lost){
@@ -319,4 +323,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {}
+    public static Color floorColor() {
+        return floorColor;
+    }
+    public static Color catcusColor() {
+        return cactusColor;
+    }
 }

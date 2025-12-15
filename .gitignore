@@ -6,4 +6,5 @@ my projects.iml
 MultiLauncher.bat
 MultiLauncher.exe
 Launcher/MultiLauncher.cpp
-levels\
+Java\levels\
+TodoApp\
