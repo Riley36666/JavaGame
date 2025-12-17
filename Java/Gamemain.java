@@ -1,7 +1,7 @@
 package Java;
 
-public class main{
-    public static void main(String[] args) {
+public class Gamemain {
+    static void main() {
         GameSettings.load();
         StartScreen.startscreen();
         if(LevelMakerSelector.getNextLevelNumber() < 3){
