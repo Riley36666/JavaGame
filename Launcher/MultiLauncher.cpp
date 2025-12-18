@@ -5,49 +5,43 @@
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 
-// forward declarations
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK WIPWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
 void LaunchEmbeddedJar(const char* resourceName);
-void OpenWIPWindow(HINSTANCE hInstance);
 void DrawGradientBackground(HDC hdc, RECT rc, COLORREF top, COLORREF bottom);
 
-// IDs for buttons
 #define ID_BUTTON_PLATFORMER 1001
-#define ID_BUTTON_WIP        1002
+#define ID_BUTTON_TODO       1002
 
 HINSTANCE g_hInstance;
 
 // =========================
-//      MAIN ENTRY POINT
+//      ENTRY POINT
 // =========================
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     g_hInstance = hInstance;
-    const char CLASS_NAME[] = "LauncherWindowClass";
 
-    WNDCLASSA wc = {};
+    WNDCLASSA wc{};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
-    wc.lpszClassName = CLASS_NAME;
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wc.lpszClassName = "MultiLauncherWindow";
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(1));
 
     RegisterClassA(&wc);
 
     HWND hwnd = CreateWindowExA(
         WS_EX_APPWINDOW,
-        CLASS_NAME,
-        "My Java Game Launcher",
+        wc.lpszClassName,
+        "MultiLauncher",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-        CW_USEDEFAULT, CW_USEDEFAULT, 700, 700,
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 720,
         NULL, NULL, hInstance, NULL
     );
 
-    if (!hwnd) return 0;
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
 
-    MSG msg = {};
+    MSG msg{};
     while (GetMessageA(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
@@ -56,70 +50,77 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
 }
 
 // =========================
-//      GRADIENT BG
+//      BACKGROUND
 // =========================
 void DrawGradientBackground(HDC hdc, RECT rc, COLORREF top, COLORREF bottom) {
-    TRIVERTEX vertex[2];
-    vertex[0].x = rc.left;
-    vertex[0].y = rc.top;
-    vertex[0].Red   = GetRValue(top) << 8;
-    vertex[0].Green = GetGValue(top) << 8;
-    vertex[0].Blue  = GetBValue(top) << 8;
-    vertex[0].Alpha = 0x0000;
+    TRIVERTEX v[2];
 
-    vertex[1].x = rc.right;
-    vertex[1].y = rc.bottom;
-    vertex[1].Red   = GetRValue(bottom) << 8;
-    vertex[1].Green = GetGValue(bottom) << 8;
-    vertex[1].Blue  = GetBValue(bottom) << 8;
-    vertex[1].Alpha = 0x0000;
+    v[0].x = rc.left;
+    v[0].y = rc.top;
+    v[0].Red   = static_cast<COLOR16>(GetRValue(top) << 8);
+    v[0].Green = static_cast<COLOR16>(GetGValue(top) << 8);
+    v[0].Blue  = static_cast<COLOR16>(GetBValue(top) << 8);
+    v[0].Alpha = 0;
 
-    GRADIENT_RECT gRect = { 0, 1 };
-    GradientFill(hdc, vertex, 2, &gRect, 1, GRADIENT_FILL_RECT_V);
+    v[1].x = rc.right;
+    v[1].y = rc.bottom;
+    v[1].Red   = static_cast<COLOR16>(GetRValue(bottom) << 8);
+    v[1].Green = static_cast<COLOR16>(GetGValue(bottom) << 8);
+    v[1].Blue  = static_cast<COLOR16>(GetBValue(bottom) << 8);
+    v[1].Alpha = 0;
+
+    GRADIENT_RECT g = { 0, 1 };
+    GradientFill(hdc, v, 2, &g, 1, GRADIENT_FILL_RECT_V);
 }
 
 // =========================
-//      MAIN WINDOW PROC
+//      MAIN WINDOW
 // =========================
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    static HFONT hFontTitle, hFontButton;
-    static HWND hTitle, hPlatformer, hWIP;
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    static HFONT hTitleFont, hButtonFont;
+    static HWND hTitle, hSubtitle, hGameBtn, hTodoBtn;
 
-    switch (uMsg) {
+    switch (msg) {
     case WM_CREATE:
-        hFontTitle = CreateFontA(40, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-                                 DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
-                                 CLEARTYPE_QUALITY, VARIABLE_PITCH, "Segoe UI");
+        hTitleFont = CreateFontA(42, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
+            CLEARTYPE_QUALITY, VARIABLE_PITCH, "Segoe UI");
 
-        hFontButton = CreateFontA(22, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-                                  DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
-                                  CLEARTYPE_QUALITY, VARIABLE_PITCH, "Segoe UI");
+        hButtonFont = CreateFontA(22, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
+            CLEARTYPE_QUALITY, VARIABLE_PITCH, "Segoe UI");
 
-        hTitle = CreateWindowA("static", "My Game Launcher",
-                               WS_VISIBLE | WS_CHILD | SS_CENTER,
-                               200, 100, 300, 60,
-                               hwnd, NULL, g_hInstance, NULL);
+        hTitle = CreateWindowA("static", "MultiLauncher",
+            WS_VISIBLE | WS_CHILD | SS_CENTER,
+            200, 80, 400, 60,
+            hwnd, NULL, g_hInstance, NULL);
 
-        hPlatformer = CreateWindowA("button", "Play Platformer",
-                                    WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                                    260, 250, 180, 50,
-                                    hwnd, (HMENU)ID_BUTTON_PLATFORMER, g_hInstance, NULL);
+        hSubtitle = CreateWindowA("static", "Choose what you want to launch",
+            WS_VISIBLE | WS_CHILD | SS_CENTER,
+            220, 140, 360, 30,
+            hwnd, NULL, g_hInstance, NULL);
 
-        hWIP = CreateWindowA("button", "WIP (Coming Soon)",
-                             WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                             260, 340, 180, 50,
-                             hwnd, (HMENU)ID_BUTTON_WIP, g_hInstance, NULL);
+        hGameBtn = CreateWindowA("button", "Play Platformer",
+            WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+            300, 260, 200, 55,
+            hwnd, (HMENU)ID_BUTTON_PLATFORMER, g_hInstance, NULL);
 
-        SendMessageA(hTitle, WM_SETFONT, (WPARAM)hFontTitle, TRUE);
-        SendMessageA(hPlatformer, WM_SETFONT, (WPARAM)hFontButton, TRUE);
-        SendMessageA(hWIP, WM_SETFONT, (WPARAM)hFontButton, TRUE);
+        hTodoBtn = CreateWindowA("button", "Open Todo App",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            300, 340, 200, 55,
+            hwnd, (HMENU)ID_BUTTON_TODO, g_hInstance, NULL);
+
+        SendMessageA(hTitle, WM_SETFONT, (WPARAM)hTitleFont, TRUE);
+        SendMessageA(hSubtitle, WM_SETFONT, (WPARAM)hButtonFont, TRUE);
+        SendMessageA(hGameBtn, WM_SETFONT, (WPARAM)hButtonFont, TRUE);
+        SendMessageA(hTodoBtn, WM_SETFONT, (WPARAM)hButtonFont, TRUE);
         return 0;
 
-    case WM_CTLCOLORBTN:
-    case WM_CTLCOLORSTATIC: {
+    case WM_CTLCOLORSTATIC:
+    case WM_CTLCOLORBTN: {
         HDC hdc = (HDC)wParam;
         SetBkMode(hdc, TRANSPARENT);
-        SetTextColor(hdc, RGB(255, 255, 255));
+        SetTextColor(hdc, RGB(240, 240, 255));
         return (LRESULT)GetStockObject(NULL_BRUSH);
     }
 
@@ -128,7 +129,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         HDC hdc = BeginPaint(hwnd, &ps);
         RECT rc;
         GetClientRect(hwnd, &rc);
-        DrawGradientBackground(hdc, rc, RGB(10, 10, 30), RGB(30, 30, 80));
+        DrawGradientBackground(hdc, rc, RGB(15, 20, 40), RGB(40, 60, 120));
         EndPaint(hwnd, &ps);
         return 0;
     }
@@ -140,9 +141,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             LaunchEmbeddedJar("gamejar");
             break;
 
-        case ID_BUTTON_WIP:
+        case ID_BUTTON_TODO:
             DestroyWindow(hwnd);
-            OpenWIPWindow(g_hInstance);
+            LaunchEmbeddedJar("todojar");
             break;
         }
         return 0;
@@ -152,68 +153,16 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         return 0;
     }
 
-    return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+    return DefWindowProcA(hwnd, msg, wParam, lParam);
 }
 
 // =========================
-//     WIP PLACEHOLDER
-// =========================
-void OpenWIPWindow(HINSTANCE hInstance) {
-    const char WIP_CLASS[] = "WIPWindowClass";
-    WNDCLASSA wc = {};
-    wc.lpfnWndProc = WIPWindowProc;
-    wc.hInstance = hInstance;
-    wc.lpszClassName = WIP_CLASS;
-    RegisterClassA(&wc);
-
-    HWND hwnd = CreateWindowExA(
-        0,
-        WIP_CLASS,
-        "Work in Progress",
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
-        CW_USEDEFAULT, CW_USEDEFAULT, 500, 400,
-        NULL, NULL, hInstance, NULL
-    );
-
-    ShowWindow(hwnd, SW_SHOW);
-    UpdateWindow(hwnd);
-}
-
-LRESULT CALLBACK WIPWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-    case WM_PAINT: {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
-        RECT rc;
-        GetClientRect(hwnd, &rc);
-        DrawGradientBackground(hdc, rc, RGB(50, 20, 20), RGB(100, 40, 40));
-
-        SetBkMode(hdc, TRANSPARENT);
-        SetTextColor(hdc, RGB(255, 255, 255));
-
-        HFONT font = CreateFontA(36, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-                                 DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
-                                 CLEARTYPE_QUALITY, VARIABLE_PITCH, "Segoe UI");
-        SelectObject(hdc, font);
-        DrawTextA(hdc, "🚧 Work in Progress 🚧", -1, &rc, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-        DeleteObject(font);
-        EndPaint(hwnd, &ps);
-        return 0;
-    }
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
-    }
-    return DefWindowProcA(hwnd, uMsg, wParam, lParam);
-}
-
-// =========================
-//     JAR LAUNCHER LOGIC
+//     JAR EXECUTION
 // =========================
 void LaunchEmbeddedJar(const char* resourceName) {
     HRSRC hRes = FindResourceA(NULL, resourceName, RT_RCDATA);
     if (!hRes) {
-        MessageBoxA(NULL, "Failed to find embedded JAR resource.", "Error", MB_ICONERROR);
+        MessageBoxA(NULL, "Embedded JAR not found.", "Launcher Error", MB_ICONERROR);
         return;
     }
 
@@ -221,24 +170,25 @@ void LaunchEmbeddedJar(const char* resourceName) {
     DWORD size = SizeofResource(NULL, hRes);
     void* data = LockResource(hData);
 
-    std::string tempPath = (std::filesystem::temp_directory_path() / "GameTemp.jar").string();
-    std::ofstream out(tempPath, std::ios::binary);
-    out.write(static_cast<const char*>(data), size);
+    std::string tempJar = (std::filesystem::temp_directory_path() / resourceName).string() + ".jar";
+    std::ofstream out(tempJar, std::ios::binary);
+    out.write((const char*)data, size);
     out.close();
 
-    std::string cmd = "javaw -jar \"" + tempPath + "\"";
-    STARTUPINFOA si = { sizeof(si) };
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE;
+    std::string cmd = "javaw -jar \"" + tempJar + "\"";
+
+    STARTUPINFOA si{ sizeof(si) };
     PROCESS_INFORMATION pi{};
 
-    if (!CreateProcessA(NULL, cmd.data(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-        MessageBoxA(NULL, "Failed to launch Java.\nMake sure Java is installed.", "Error", MB_ICONERROR);
+    if (!CreateProcessA(NULL, cmd.data(), NULL, NULL, FALSE,
+        CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+
+        MessageBoxA(NULL, "Java not found.\nPlease install Java.", "Launcher Error", MB_ICONERROR);
         return;
     }
 
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    std::filesystem::remove(tempPath);
+    std::filesystem::remove(tempJar);
 }

@@ -1,0 +1,10 @@
+# Level 3
+# PLAYER x y
+# PLATFORM x y w h
+# CACTUS x y w h
+# TRAMP x y w h
+# WIN x y w h
+
+PLAYER 100 630
+PLATFORM 0 680 3000 50
+WIN 2800 630 50 50

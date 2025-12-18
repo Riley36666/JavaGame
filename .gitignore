@@ -6,6 +6,6 @@ my projects.iml
 MultiLauncher.bat
 MultiLauncher.exe
 Launcher/MultiLauncher.cpp
-Java\levels\
-TodoApp\
+src\Java\levels\
+tasks
 .vscode

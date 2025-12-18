@@ -1,0 +1,7 @@
+# Level 4
+# PLAYER x y
+# PLATFORM x y w h
+# CACTUS x y w h
+# TRAMP x y w h
+# WIN x y w h
+PLAYER 100 590

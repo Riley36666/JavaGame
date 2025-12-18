@@ -1,0 +1,10 @@
+# Level 7
+# PLAYER x y
+# PLATFORM x y w h
+# CACTUS x y w h
+# TRAMP x y w h
+# WIN x y w h
+PLAYER 100 590
+WIN 1056 320 32 32
+PLATFORM 832 480 32 32
+PLATFORM 960 512 32 32
