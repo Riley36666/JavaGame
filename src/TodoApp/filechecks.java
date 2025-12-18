@@ -5,7 +5,6 @@ import java.io.File;
 public class filechecks {
 
     private static final String TASKS_FOLDER = "tasks";
-    private static int filescount;
 
     public static void existCheck() {
         if (ensureFolderExists()) {
@@ -22,13 +21,11 @@ public class filechecks {
         return true;
     }
 
-    public static int getTask(int task) {
-        return task;
-    }
 
     public static int filecount() {
         File dir = new File("tasks");
         String[] files = dir.list();
+        int filescount;
         if (files != null) {
             filescount = files.length;
         } else {
