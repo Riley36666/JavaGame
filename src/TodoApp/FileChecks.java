@@ -2,7 +2,7 @@ package TodoApp;
 
 import java.io.File;
 
-public class filechecks {
+public class FileChecks {
 
     private static final String TASKS_FOLDER = "tasks";
 

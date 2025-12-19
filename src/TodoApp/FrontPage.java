@@ -10,8 +10,9 @@ import java.io.IOException;
 
 public class FrontPage {
 
-    static int filecount = filechecks.filecount();
+    static int filecount = FileChecks.filecount();
     static JFrame Frame = new JFrame("Todo app");
+    static JPanel Panel = new JPanel();
 
     public static void startPage() {
         Frame.setSize(600, 800);
@@ -22,24 +23,27 @@ public class FrontPage {
         for (int i = 1; i <= filecount; i++) {
             titles(i);
         }
-
+        createTasksbutton();
+        Frame.add(Panel);
+        Frame.revalidate();
+        Frame.repaint();
+        Panel.setVisible(true);
         Frame.setVisible(true);
     }
 
-    private static void createtask(String task, int page) {
+    private static void createList(String task, int page) {
         JButton tasks = new JButton(task);
 
         tasks.addActionListener(e -> {
             try {
-                Notes.open(page);
+                Notes.open(page, Frame);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        Frame.add(tasks);
-        Frame.revalidate();
-        Frame.repaint();
+        Panel.add(tasks);
+
     }
 
     private static void titles(int i) {
@@ -57,12 +61,20 @@ public class FrontPage {
                 }
 
                 // First valid line is the task title
-                createtask(line, i);
+                createList(line, i);
                 break;
             }
 
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    private static void createTasksbutton() {
+        JButton createTaskbutton = new JButton("Create a Task");
+        createTaskbutton.addActionListener(e -> {
+            CreatingTask.savingTextframe(Frame);
+        });
+
+        Panel.add(createTaskbutton);
     }
 }
