@@ -10,113 +10,183 @@ import java.io.IOException;
 public class FrontPage {
 
     static int filecount = FileChecks.filecount();
-    static JFrame Frame = new JFrame("Todo App");
-    static JPanel Panel = new JPanel();
+    static JFrame frame = new JFrame("Todo App");
+
+    // Theme
+    static final Color BG = new Color(18, 18, 18);
+    static final Color CARD = new Color(28, 28, 28);
+    static final Color ACCENT = new Color(0, 153, 255);
+    static final Color TEXT = new Color(230, 230, 230);
+    static final Color MUTED = new Color(160, 160, 160);
+
+    static JPanel listPanel = new JPanel();
 
     public static void startPage() {
-
         SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception ignored) {}
+            setLookAndFeel();
 
-            // ---------- FRAME ----------
-            Frame.setSize(600, 800);
-            Frame.setLocationRelativeTo(null);
-            Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            Frame.setLayout(new BorderLayout());
-            Frame.setBackground(Color.BLACK);
-            // ---------- CONTENT PANEL ----------
-            Panel.setLayout(new BoxLayout(Panel, BoxLayout.Y_AXIS));
-            Panel.setBorder(new EmptyBorder(20, 20, 20, 20));
-            Panel.setBackground(new Color(0, 0, 0));
+            frame.setSize(600, 800);
+            frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setLayout(new BorderLayout());
+            frame.getContentPane().setBackground(BG);
 
-            // ---------- ADD TASK TITLES ----------
-            for (int i = 1; i <= filecount; i++) {
-                titles(i);
-            }
+            frame.add(header(), BorderLayout.NORTH);
+            frame.add(content(), BorderLayout.CENTER);
+            frame.add(bottomBar(), BorderLayout.SOUTH);
 
-            // ---------- ADD CREATE TASK BUTTON ----------
-            createTasksbutton();
-
-            // ---------- SCROLL SUPPORT ----------
-            JScrollPane scrollPane = new JScrollPane(Panel);
-            scrollPane.setBorder(null);
-            scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-            Frame.add(scrollPane, BorderLayout.CENTER);
-            Frame.setVisible(true);
+            frame.setVisible(true);
         });
     }
 
-    // ---------- CREATE TASK BUTTON CARD ----------
-    private static void createList(String task, int page) {
-        JButton tasks = new JButton(task);
-        tasks.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        tasks.setBackground(Color.WHITE);
-        tasks.setForeground(new Color(40, 40, 40));
-        tasks.setFocusPainted(false);
-        tasks.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
-        tasks.setAlignmentX(Component.LEFT_ALIGNMENT);
+    /* ---------------- HEADER ---------------- */
 
-        tasks.addActionListener(e -> {
+    private static JPanel header() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(BG);
+        header.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JLabel title = new JLabel("Your Tasks");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setForeground(TEXT);
+
+        JLabel subtitle = new JLabel(filecount + " active tasks");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitle.setForeground(MUTED);
+
+        JPanel text = new JPanel();
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+        text.setBackground(BG);
+        text.add(title);
+        text.add(Box.createVerticalStrut(4));
+        text.add(subtitle);
+
+        header.add(text, BorderLayout.WEST);
+        return header;
+    }
+
+    /* ---------------- CONTENT ---------------- */
+
+    private static JScrollPane content() {
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(BG);
+        listPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
+
+        for (int i = 1; i <= filecount; i++) {
+            readTitle(i);
+        }
+
+        JScrollPane scroll = new JScrollPane(listPanel);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.setBackground(BG);
+        scroll.getViewport().setBackground(BG);
+
+        return scroll;
+    }
+
+    /* ---------------- TASK CARD ---------------- */
+
+    private static void createTaskCard(String title, int page) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(CARD);
+        card.setBorder(new EmptyBorder(14, 16, 14, 16));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel text = new JLabel(title);
+        text.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        text.setForeground(TEXT);
+
+        JButton open = new JButton("OPEN");
+        open.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        open.setForeground(ACCENT);
+        open.setBackground(CARD);
+        open.setBorderPainted(false);
+        open.setFocusPainted(false);
+        open.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        open.addActionListener(e -> {
             try {
-                Notes.open(page, Frame);
+                Notes.open(page, frame);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        JPanel wrapper = new JPanel();
-        wrapper.setLayout(new BorderLayout());
-        wrapper.setBackground(new Color(245, 246, 248));
-        wrapper.add(tasks, BorderLayout.CENTER);
-        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
-        wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, tasks.getPreferredSize().height + 10));
+        card.add(text, BorderLayout.WEST);
+        card.add(open, BorderLayout.EAST);
 
-        Panel.add(wrapper);
-        Panel.add(Box.createVerticalStrut(10));
+        listPanel.add(card);
+        listPanel.add(Box.createVerticalStrut(12));
     }
 
-    // ---------- READ TASK TITLE ----------
-    private static void titles(int i) {
-        try (BufferedReader br = new BufferedReader(new FileReader("tasks/task" + i + ".txt"))) {
+    /* ---------------- FILE READ ---------------- */
+
+    private static void readTitle(int i) {
+        try (BufferedReader br = new BufferedReader(
+                new FileReader("tasks/task" + i + ".txt"))) {
 
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
-                createList(line, i);
-                break;
+                if (!line.isEmpty() && !line.startsWith("#")) {
+                    createTaskCard(line, i);
+                    break;
+                }
             }
-
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        } catch (IOException e) {
+            // Ignore missing files silently
         }
     }
 
-    // ---------- CREATE TASK BUTTON ----------
-    private static void createTasksbutton() {
-        JButton createTaskbutton = new JButton("Create a Task");
-        createTaskbutton.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        createTaskbutton.setBackground(new Color(33, 33, 33));
-        createTaskbutton.setForeground(Color.WHITE);
-        createTaskbutton.setFocusPainted(false);
-        createTaskbutton.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
-        createTaskbutton.setAlignmentX(Component.LEFT_ALIGNMENT);
+    /* ---------------- BOTTOM BAR ---------------- */
 
-        createTaskbutton.addActionListener(e -> {
-            CreatingTask.savingTextframe(Frame);
+    private static JPanel bottomBar() {
+        JPanel bar = new JPanel();
+        bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
+        bar.setBackground(BG);
+        bar.setBorder(new EmptyBorder(16, 20, 20, 20));
+
+        JButton add = new JButton("+  New Task");
+        JButton remove = new JButton("Remove Task");
+
+        // ---------- ADD BUTTON (PRIMARY) ----------
+        add.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        add.setForeground(Color.BLACK);
+        add.setBackground(ACCENT);
+        add.setFocusPainted(false);
+        add.setBorder(new EmptyBorder(12, 22, 12, 22));
+        add.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        add.addActionListener(e -> CreatingTask.savingTextframe(frame));
+
+        // ---------- REMOVE BUTTON (DESTRUCTIVE) ----------
+        remove.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        remove.setForeground(new Color(220, 80, 80));
+        remove.setBackground(BG);
+        remove.setFocusPainted(false);
+        remove.setBorder(BorderFactory.createLineBorder(new Color(220, 80, 80), 2));
+        remove.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        remove.addActionListener(e -> {
+
         });
 
-        JPanel wrapper = new JPanel();
-        wrapper.setLayout(new BorderLayout());
-        wrapper.setBackground(new Color(245, 246, 248));
-        wrapper.add(createTaskbutton, BorderLayout.CENTER);
-        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
-        wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, createTaskbutton.getPreferredSize().height + 10));
+        // ---------- LAYOUT ----------
+        bar.add(remove);
+        bar.add(Box.createHorizontalGlue());
+        bar.add(add);
 
-        Panel.add(Box.createVerticalStrut(20));
-        Panel.add(wrapper);
+        return bar;
+    }
+
+
+    /* ---------------- LAF ---------------- */
+
+    private static void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {}
     }
 }
