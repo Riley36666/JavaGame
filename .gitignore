@@ -7,5 +7,6 @@ MultiLauncher.bat
 MultiLauncher.exe
 Launcher/MultiLauncher.cpp
 src\Java\levels\
+src\TodoApp\
 tasks
 .vscode
