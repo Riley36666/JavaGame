@@ -6,7 +6,7 @@ import javax.swing.border.EmptyBorder;
 
 public class StartScreen {
     public static void startscreen() {
-        // --- Frame setup ---
+        //  Frame setup
         JFrame frame = new JFrame("My Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(700, 700);
@@ -14,7 +14,7 @@ public class StartScreen {
         frame.setIconImage(
                 Toolkit.getDefaultToolkit().getImage(StartScreen.class.getResource("/icon.png"))
         );
-        // --- Background panel with gradient ---
+        //  Background panel with gradient
         JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -30,18 +30,18 @@ public class StartScreen {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(new EmptyBorder(150, 200, 150, 200));
 
-        // --- Title label ---
+        //  Title label
         JLabel title = new JLabel("My Game");
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 40));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // --- Button styling helper ---
+        //  Button styling helper
         JButton startButton = createButton("Start Game");
         JButton optionsButton = createButton("Options");
         JButton exitButton = createButton("Exit Game");
         JButton levelbuilder = createButton("Level Builder");
-        // --- Button actions ---
+        //  Button actions
         startButton.addActionListener(e -> {
             //System.out.println("Start button pressed!");
             LevelSelector.open(frame);
@@ -62,7 +62,6 @@ public class StartScreen {
             frame.dispose();
         });
 
-        // --- Add components ---
         panel.add(title);
         panel.add(Box.createVerticalStrut(60));
         panel.add(startButton);

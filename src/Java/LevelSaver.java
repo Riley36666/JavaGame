@@ -18,7 +18,7 @@ public class LevelSaver {
 
         ensureFolderExists();
 
-        // ---------- VALIDATION ----------
+        //  VALIDATION
         boolean hasWin = false;
 
         for (int r = 0; r < tiles.length; r++) {
@@ -34,7 +34,7 @@ public class LevelSaver {
         if (!hasWin) {
             return false; // ❌ invalid level
         }
-        // --------------------------------
+
 
         String path = LEVEL_FOLDER + "level" + level + ".txt";
 
@@ -66,7 +66,7 @@ public class LevelSaver {
                 }
             }
 
-            return true; // ✅ saved
+            return true;
 
         } catch (IOException e) {
             e.printStackTrace();

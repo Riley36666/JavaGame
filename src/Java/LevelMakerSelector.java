@@ -35,13 +35,13 @@ public class LevelMakerSelector {
 
         int nextLevel = getNextLevelNumber();
 
-        // --- Top panel ---
+        //  Top panel
         JLabel title = new JLabel("Level Maker", SwingConstants.CENTER);
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
         backgroundPanel.add(title, BorderLayout.NORTH);
 
-        // --- Center content ---
+        //  Center content
         JPanel centerPanel = new JPanel(new GridLayout(2, 1, 20, 20));
         centerPanel.setOpaque(false);
 
@@ -73,7 +73,7 @@ public class LevelMakerSelector {
         frame.setVisible(true);
     }
 
-    // --- Finds next unused level number ---
+    //  Finds next unused level number
     public static int getNextLevelNumber() {
         File folder = new File(LEVEL_FOLDER);
         if (!folder.exists()) folder.mkdir();
@@ -93,7 +93,7 @@ public class LevelMakerSelector {
     }
 
 
-    // --- Button styling (matches LevelSelector) ---
+    //  Button styling (matches LevelSelector)
     public static void stylePrimaryButton(JButton button) {
         button.setFocusPainted(false);
         button.setBackground(new Color(60, 120, 220));

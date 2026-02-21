@@ -10,25 +10,24 @@ public class LevelSelector {
 
     private static int levelCount;
     private static int currentPage = 1;
-    private static int amountOfPages; // not final, computed after levelCount is set
+    private static int amountOfPages;
 
     private static int getUnlockedLevels() {
         return GameSettings.getUnlockedFloors();
     }
 
     static {
-        File dir = new File("levels"); // replace with your actual directory path
+        File dir = new File("levels");
         String[] files = dir.list();
         if (files != null) {
             levelCount = files.length;
         } else {
             levelCount = 0;
         }
-        amountOfPages = mathForPages(levelCount); // compute after levelCount is ready
+        amountOfPages = mathForPages(levelCount);
     }
 
     private static int mathForPages(int levelCount) {
-        // Use ceiling division so leftover levels still count as a page
         return (int) Math.ceil(levelCount / 10.0);
     }
 
@@ -59,7 +58,7 @@ public class LevelSelector {
         };
         backgroundPanel.setLayout(new BorderLayout(0, 40));
 
-        // --- Title & unlocked label ---
+        //  Title & unlocked label
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
@@ -77,7 +76,7 @@ public class LevelSelector {
         topPanel.add(unlockedLabel, BorderLayout.EAST);
         backgroundPanel.add(topPanel, BorderLayout.NORTH);
 
-        // --- Center content ---
+        //  Center content
         if (page <= amountOfPages) {
             JPanel gridPanel = new JPanel(new GridLayout(2, 5, 20, 20));
             gridPanel.setOpaque(false);
@@ -112,7 +111,7 @@ public class LevelSelector {
             backgroundPanel.add(wipLabel, BorderLayout.CENTER);
         }
 
-        // --- Bottom navigation panel ---
+        //  Bottom navigation panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
 
