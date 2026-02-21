@@ -4,7 +4,7 @@
 #include <string>
 
 int main() {
-    // 1️⃣ Load the embedded JAR resource
+// load jar
     HRSRC hRes = FindResourceA(NULL, "gamejar", RT_RCDATA);
     if (!hRes) {
         MessageBoxA(NULL, "Failed to find embedded JAR resource.", "Error", MB_ICONERROR);
@@ -15,39 +15,39 @@ int main() {
     DWORD size = SizeofResource(NULL, hRes);
     void* data = LockResource(hData);
 
-    // 2️⃣ Write it to a temporary file
+    // Write it to a temporary file
     std::string tempPath = (std::filesystem::temp_directory_path() / "GameTemp.jar").string();
     std::ofstream out(tempPath, std::ios::binary);
     out.write(static_cast<const char*>(data), size);
     out.close();
 
-    // 3️⃣ Build command line for javaw (no console)
+    // Build command line for javaw (no console)
     std::string cmd = "javaw -jar \"" + tempPath + "\"";
 
-    // 4️⃣ Launch Java silently (no cmd window)
+    // Launch Java silently (no cmd window)
     STARTUPINFOA si = { sizeof(si) };
     si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE; // hide any potential window
+    si.wShowWindow = SW_HIDE;
     PROCESS_INFORMATION pi;
 
     if (!CreateProcessA(
             NULL,
-            cmd.data(),  // command line
+            cmd.data(),
             NULL, NULL, FALSE,
-            CREATE_NO_WINDOW,  // prevents any console window
+            CREATE_NO_WINDOW,
             NULL, NULL,
             &si, &pi)) {
         MessageBoxA(NULL, "Failed to launch Java.\nMake sure Java is installed.", "Error", MB_ICONERROR);
         return 1;
     }
 
-    // 5️⃣ Optional: wait for the game to close
+
     WaitForSingleObject(pi.hProcess, INFINITE);
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 
-    // 6️⃣ Delete the temp jar after closing
+    // Delete the temp jar after closing
     std::filesystem::remove(tempPath);
 
     return 0;

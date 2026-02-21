@@ -14,9 +14,9 @@ void DrawGradientBackground(HDC hdc, RECT rc, COLORREF top, COLORREF bottom);
 
 HINSTANCE g_hInstance;
 
-// =========================
+
 //      ENTRY POINT
-// =========================
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     g_hInstance = hInstance;
 
@@ -49,9 +49,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     return 0;
 }
 
-// =========================
+
 //      BACKGROUND
-// =========================
+
 void DrawGradientBackground(HDC hdc, RECT rc, COLORREF top, COLORREF bottom) {
     TRIVERTEX v[2];
 
@@ -73,9 +73,9 @@ void DrawGradientBackground(HDC hdc, RECT rc, COLORREF top, COLORREF bottom) {
     GradientFill(hdc, v, 2, &g, 1, GRADIENT_FILL_RECT_V);
 }
 
-// =========================
+
 //      MAIN WINDOW
-// =========================
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     static HFONT hTitleFont, hButtonFont;
     static HWND hTitle, hSubtitle, hGameBtn, hTodoBtn;
@@ -156,9 +156,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     return DefWindowProcA(hwnd, msg, wParam, lParam);
 }
 
-// =========================
+
 //     JAR EXECUTION
-// =========================
+
 void LaunchEmbeddedJar(const char* resourceName) {
     HRSRC hRes = FindResourceA(NULL, resourceName, RT_RCDATA);
     if (!hRes) {
